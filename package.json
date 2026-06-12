@@ -1,0 +1,45 @@
+{
+  "name": "photoshop-bekari0",
+  "version": "1.0.0",
+  "description": "Веб-приложение для обработки изображений с поддержкой форматов PNG, JPG и кастомного GrayBit-7",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "antd": "^5.27.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.6.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.22",
+    "globals": "^16.4.0",
+    "sass": "^1.93.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.45.0",
+    "vite": "^4.5.3"
+  },
+  "keywords": [
+    "image-processing",
+    "canvas",
+    "react",
+    "typescript",
+    "graybit-7",
+    "image-lab"
+  ],
+  "author": "Bekari0",
+  "license": "MIT"
+}

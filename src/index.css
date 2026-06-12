@@ -1,0 +1,265 @@
+/**
+ * Глобальные стили приложения
+ * Сброс стилей и базовые настройки для всех элементов
+ */
+
+/* Сброс стилей по умолчанию */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Настройки для HTML и body */
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  color: #213547;
+  background-color: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Настройки для корневого элемента */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Улучшенные стили для ссылок */
+a {
+  color: #1890ff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+a:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+/* Улучшенные стили для кнопок */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+/* Улучшенные стили для заголовков */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5em;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+/* Улучшенные стили для текста */
+p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+/* Улучшенные стили для списков */
+ul, ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.25em;
+}
+
+/* Улучшенные стили для изображений */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Улучшенные стили для canvas */
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Улучшенные стили для форм */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Улучшенные стили для таблиц */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+th, td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+th {
+  font-weight: 600;
+  background-color: #fafafa;
+}
+
+/* Улучшенные стили для кода */
+code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+pre {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Улучшенные стили для выделения */
+::selection {
+  background-color: #1890ff;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #1890ff;
+  color: white;
+}
+
+/* Улучшенные стили для скроллбара */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+}
+
+/* Темная тема (если поддерживается) */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+  }
+  
+  a {
+    color: #646cff;
+  }
+  
+  a:hover {
+    color: #535bf2;
+  }
+  
+  code {
+    background-color: #1a1a1a;
+    color: #f8f8f2;
+  }
+  
+  pre {
+    background-color: #1a1a1a;
+    color: #f8f8f2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #2a2a2a;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #777;
+  }
+}
