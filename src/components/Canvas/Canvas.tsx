@@ -1,268 +1,60 @@
-/**
- * Компонент Canvas для отображения изображений
- * Поддерживает адаптивное масштабирование и высокое качество рендеринга
- */
-
-import { useEffect, useRef, useCallback } from "react";
+import { forwardRef, useEffect, useRef } from "react";
+import { useImage } from "../../contexts/ImageContext";
 import styles from "./Canvas.module.scss";
 
-// Типы
-interface CanvasProps {
-  /** Данные изображения для отображения */
-  imageData: ImageData | null;
-  /** Callback при готовности canvas */
-  onCanvasReady: (canvas: HTMLCanvasElement) => void;
-  /** Масштаб отображения в процентах */
-  displayScale?: number;
-  /** Метод интерполяции для отображения */
-  interpolationMethod?: 'nearest-neighbor' | 'bilinear';
-}
-
-// Константы
-const DEFAULT_CANVAS_SIZE = 600;
-const CANVAS_PADDING = 32;
-
-/**
- * Компонент Canvas для отображения изображений
- */
-function Canvas({ imageData, onCanvasReady, displayScale = 100, interpolationMethod = 'bilinear' }: CanvasProps): React.JSX.Element {
-  // Рефы для DOM элементов
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
+  const { setCanvasRef, imageData, scaledImageData, offsetX, offsetY } = useImage();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Состояние для перетаскивания
-  const isDraggingRef = useRef(false);
-  const lastXRef = useRef(0);
-  const lastYRef = useRef(0);
-
-  /**
-   * Обновляет размеры canvas в соответствии с размерами контейнера
-   * @returns масштаб изображения или undefined при ошибке
-   */
-  const updateCanvasSize = useCallback((): number | undefined => {
-    const canvas = canvasRef.current;
-    const wrapper = wrapperRef.current;
-    
-    if (!canvas || !wrapper) {
-      console.warn("⚠️ Canvas или wrapper не найден");
-      return undefined;
+  // Эффект для инициализации ссылки на canvas
+  useEffect(() => {
+    if (ref && "current" in ref) {
+      setCanvasRef(ref);
     }
+  }, [ref, setCanvasRef]);
 
-    // Получаем размеры контейнера
-    const wrapperWidth = wrapper.clientWidth;
-    const wrapperHeight = wrapper.clientHeight;
+  // Эффект для обновления размеров canvas при изменении размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = ref && "current" in ref ? ref.current : null;
+      const wrapper = wrapperRef.current;
+      if (!canvas || !wrapper) return;
 
-    console.log("📏 Размеры контейнера:", { wrapperWidth, wrapperHeight });
+      // Устанавливаем размеры canvas равными размерам wrapper
+      canvas.width = wrapper.clientWidth;
+      canvas.height = wrapper.clientHeight;
 
-    // Если изображение не загружено, устанавливаем базовый размер
-    if (!imageData) {
-      const size = Math.min(DEFAULT_CANVAS_SIZE, wrapperWidth - CANVAS_PADDING);
-      canvas.width = size;
-      canvas.height = size;
-      
-      console.log("🎨 Установлен базовый размер canvas:", { width: size, height: size });
-      return undefined;
-    }
-    
-    // Используем только displayScale для определения финального масштаба
-    const finalScale = displayScale / 100;
+      // Если есть масштабированное изображение, перерисовываем его
+      if (scaledImageData) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.putImageData(scaledImageData, offsetX, offsetY);
+        }
+      }
+    };
 
-    // Устанавливаем размеры canvas
-    canvas.width = Math.floor(imageData.width * finalScale);
-    canvas.height = Math.floor(imageData.height * finalScale);
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Инициализируем размеры при монтировании
 
-    console.log("🎨 Canvas настроен:", {
-      imageSize: { width: imageData.width, height: imageData.height },
-      userScale: displayScale,
-      finalScale,
-      canvasSize: { width: canvas.width, height: canvas.height }
-    });
+    return () => window.removeEventListener("resize", handleResize);
+  }, [ref, scaledImageData, offsetX, offsetY]);
 
-    return finalScale;
-  }, [imageData, displayScale]);
-
-  /**
-   * Рендерит изображение на canvas
-   */
-  const renderImage = useCallback((): void => {
-    const canvas = canvasRef.current;
-    if (!canvas || !imageData) {
-      console.warn("⚠️ Canvas или imageData недоступны для рендеринга");
-      return;
-    }
+  // Эффект для отрисовки изображения при его изменении
+  useEffect(() => {
+    const canvas = ref && "current" in ref ? ref.current : null;
+    if (!canvas || !scaledImageData) return;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      console.error("❌ Не удалось получить контекст canvas");
-      return;
-    }
+    if (!ctx) return;
 
-    console.log("🎨 Начинаем рендеринг изображения...");
-
-    // Очищаем canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Создаем временный canvas для масштабирования
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = imageData.width;
-    tempCanvas.height = imageData.height;
-    
-    const tempCtx = tempCanvas.getContext("2d");
-    if (!tempCtx) {
-      console.error("❌ Не удалось создать временный контекст canvas");
-      return;
-    }
-
-    // Рисуем оригинальное изображение на временном canvas
-    tempCtx.putImageData(imageData, 0, 0);
-
-    // Настройки сглаживания в зависимости от метода интерполяции
-    if (interpolationMethod === 'nearest-neighbor') {
-      ctx.imageSmoothingEnabled = false;
-    } else {
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-    }
-
-    // Рисуем масштабированное изображение на основном canvas
-    ctx.drawImage(
-      tempCanvas,
-      0, 0, imageData.width, imageData.height,
-      0, 0, canvas.width, canvas.height
-    );
-
-    console.log("✅ Изображение успешно отрендерено");
-  }, [imageData, interpolationMethod]);
-  
-  /**
-   * Обработчик начала перетаскивания
-   * @param event - событие мыши
-   */
-  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
-    isDraggingRef.current = true;
-    lastXRef.current = event.clientX;
-    lastYRef.current = event.clientY;
-    document.body.style.userSelect = 'none'; // Запретить выделение текста при перетаскивании
-    document.body.style.cursor = 'grabbing';
-  }, []);
-
-  /**
-   * Обработчик перетаскивания
-   * @param event - событие мыши
-   */
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    
-    const dx = event.clientX - lastXRef.current;
-    const dy = event.clientY - lastYRef.current;
-    
-    const wrapper = wrapperRef.current;
-    if (wrapper) {
-      wrapper.scrollTop -= dy;
-      wrapper.scrollLeft -= dx;
-    }
-
-    lastXRef.current = event.clientX;
-    lastYRef.current = event.clientY;
-  }, []);
-
-  /**
-   * Обработчик окончания перетаскивания
-   */
-  const handleMouseUp = useCallback(() => {
-    isDraggingRef.current = false;
-    document.body.style.userSelect = ''; // Восстановить выделение текста
-    document.body.style.cursor = 'default';
-  }, []);
-
-  /**
-   * Обработчик изменения размера окна
-   */
-  const handleResize = useCallback((): void => {
-    console.log("🔄 Обработка изменения размера окна...");
-    
-    if (imageData) {
-      updateCanvasSize();
-      renderImage();
-    } else {
-      updateCanvasSize();
-    }
-  }, [imageData, updateCanvasSize, renderImage]);
-
-  // Инициализация canvas при монтировании
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      console.log("🎨 Canvas инициализирован");
-      updateCanvasSize();
-      onCanvasReady(canvas);
-    }
-  }, [onCanvasReady, updateCanvasSize]);
-
-  // Обработка изменения данных изображения и добавление обработчиков событий
-  useEffect(() => {
-    console.log("🖼️ Данные изображения изменились:", imageData ? "присутствуют" : "отсутствуют");
-    
-    const canvas = canvasRef.current;
-    if (canvas) {
-      if (imageData) {
-        updateCanvasSize();
-        renderImage();
-      } else {
-        updateCanvasSize();
-      }
-    }
-    
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [imageData, updateCanvasSize, renderImage, handleMouseMove, handleMouseUp]);
-
-  // Обработка изменения масштаба отображения
-  useEffect(() => {
-    console.log("🔍 Масштаб отображения изменился:", displayScale);
-    
-    if (imageData) {
-      updateCanvasSize();
-      renderImage();
-    }
-  }, [displayScale, imageData, updateCanvasSize, renderImage]);
-
-  // Обработка изменения метода интерполяции
-  useEffect(() => {
-    console.log("🎨 Метод интерполяции изменился:", interpolationMethod);
-    
-    if (imageData) {
-      renderImage();
-    }
-  }, [interpolationMethod, imageData, renderImage]);
-
-  // Обработка изменения размера окна
-  useEffect(() => {
-    console.log("🔄 Устанавливаем обработчик изменения размера окна");
-    
-    window.addEventListener("resize", handleResize);
-    
-    return () => {
-      console.log("🔄 Удаляем обработчик изменения размера окна");
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [handleResize]);
+    ctx.putImageData(scaledImageData, offsetX, offsetY);
+  }, [ref, scaledImageData, offsetX, offsetY]);
 
   return (
     <div ref={wrapperRef} className={styles.canvasWrapper}>
-      <canvas 
-        ref={canvasRef} 
-        className={styles.canvas}
-        onMouseDown={handleMouseDown}
-        aria-label={imageData ? "Изображение" : "Пустой canvas"}
-      />
+      <canvas ref={ref} className={styles.canvas} />
     </div>
   );
-}
-
-export default Canvas;
+}); 

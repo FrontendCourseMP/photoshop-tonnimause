@@ -1,190 +1,20 @@
-/**
- * Стили для компонента Canvas
- * Обеспечивает адаптивное отображение и центрирование изображений
- */
-
-// Переменные
-$canvas-bg: #f0f0f0;
-$canvas-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-$canvas-border-radius: 8px;
-$canvas-transition: all 0.3s ease;
-
-// Основной контейнер для canvas
 .canvasWrapper {
-  position: relative;
-  flex: 1;
-  overflow: auto; // Разрешает прокрутку, если изображение выходит за пределы
-  background: $canvas-bg;
-  min-height: calc(100vh - 128px); // Вычитаем высоту header и footer
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
   padding: 16px;
-  border-radius: $canvas-border-radius;
-  transition: $canvas-transition;
-  display: flex; // Возвращаем flexbox, но с другими параметрами
-  justify-content: center; // Центрируем по горизонтали
-  align-items: center; // Центрируем по вертикали
-
-  // Эффект при наведении
-  &:hover {
-    background: darken($canvas-bg, 2%);
-  }
-
-  // Адаптивные размеры
-  @media (max-width: 768px) {
-    min-height: calc(100vh - 100px);
-    padding: 12px;
-  }
-
-  @media (max-width: 480px) {
-    min-height: calc(100vh - 80px);
-    padding: 8px;
-  }
 }
 
-// Canvas элемент
 .canvas {
-  background: white;
-  box-shadow: $canvas-shadow;
-  border-radius: $canvas-border-radius;
-  transition: $canvas-transition;
-  cursor: default;
-
-  // Эффект при наведении
-  &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-
-  // Анимация появления
-  &.fadeIn {
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  // Анимация масштабирования
-  &.scaleIn {
-    animation: scaleIn 0.3s ease-out;
-  }
-}
-
-// Анимации
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-// Состояния canvas
-.canvasWrapper {
-  // Пустой canvas
-  &:not(:has(.canvas[width="0"])) {
-    .canvas {
-      border: 2px dashed #d9d9d9;
-      background: transparent;
-      box-shadow: none;
-      
-      &:hover {
-        border-color: #1890ff;
-        background: rgba(24, 144, 255, 0.05);
-      }
-    }
-  }
-
-  // Canvas с изображением
-  &:has(.canvas[width]:not([width="0"])) {
-    .canvas {
-      border: none;
-      background: white;
-    }
-  }
-}
-
-// Адаптивные стили для различных размеров экрана
-@media (max-width: 1200px) {
-  .canvasWrapper {
-    min-height: calc(100vh - 120px);
-  }
-}
-
-@media (max-width: 992px) {
-  .canvasWrapper {
-    min-height: calc(100vh - 100px);
-    padding: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .canvasWrapper {
-    min-height: calc(100vh - 80px);
-    padding: 8px;
-    
-    .canvas {
-      border-radius: 6px;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .canvasWrapper {
-    min-height: calc(100vh - 60px);
-    padding: 4px;
-    
-    .canvas {
-      border-radius: 4px;
-    }
-  }
-}
-
-// Темная тема
-@media (prefers-color-scheme: dark) {
-  .canvasWrapper {
-    background: #1a1a1a;
-    
-    &:hover {
-      background: #2a2a2a;
-    }
-  }
-  
-  .canvas {
-    background: #2a2a2a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    
-    &:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    }
-  }
-}
-
-// Высокое разрешение экрана
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .canvas {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
-}
-
-// Печать
-@media print {
-  .canvasWrapper {
-    background: white;
-    box-shadow: none;
-    border: 1px solid #000;
-  }
-  
-  .canvas {
-    box-shadow: none;
-    border: 1px solid #000;
-  }
-}
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  max-height: 100%;
+} 

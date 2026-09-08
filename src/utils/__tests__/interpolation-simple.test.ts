@@ -9,9 +9,9 @@ import {
   clearInterpolationCache,
   getCacheSize,
   type ScaleParams
-} from '../ImageInterpolation'
+} from '../resizeImage'
 
-describe('ImageInterpolation - Simple Tests', () => {
+describe('resizeImage - Simple Tests', () => {
   beforeEach(() => {
     clearInterpolationCache()
   })

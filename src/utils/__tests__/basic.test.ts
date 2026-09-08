@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { calculateMegapixels, validateScaleParams, type ScaleParams } from '../ImageInterpolation'
+import { calculateMegapixels, validateScaleParams, type ScaleParams } from '../resizeImage'
 
 describe('Basic functionality tests', () => {
   it('should calculate megapixels correctly', () => {

@@ -1,0 +1,51 @@
+.statusBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border-top: 1px solid #d9d9d9;
+  height: 40px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.statusItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:first-child {
+    justify-content: flex-start;
+  }
+
+  &:last-child {
+    justify-content: flex-end;
+  }
+}
+
+.label {
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+.value {
+  min-width: 60px;
+  white-space: nowrap;
+}
+
+.scaleSelect {
+  width: 80px !important;
+
+  :global {
+    .ant-select-selector {
+      padding-right: 24px !important;
+    }
+
+    .ant-select-selection-item {
+      text-align: right;
+      padding-right: 8px !important;
+    }
+  }
+} 

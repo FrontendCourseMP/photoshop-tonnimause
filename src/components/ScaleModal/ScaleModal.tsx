@@ -6,8 +6,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Modal, Form, InputNumber, Select, Checkbox, Button, Space, Typography, Tooltip } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import type { InterpolationMethod, ScaleParams } from "../../utils/ImageInterpolation";
-import { calculateMegapixels, validateScaleParams } from "../../utils/ImageInterpolation";
+import type { InterpolationMethod, ScaleParams } from "../../utils/resizeImage";
+import { calculateMegapixels, validateScaleParams } from "../../utils/resizeImage";
 
 // Типы
 interface ScaleModalProps {
