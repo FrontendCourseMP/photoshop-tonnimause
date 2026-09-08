@@ -3,6 +3,7 @@ import s from './Canvas.module.scss';
 import { useImage } from '../../contexts/ImageContext';
 import { useTools } from '../../contexts/ToolContext';
 import { useHandTool } from '../InstrumentsPanel/tools/HandTool';
+import { useColorPicker } from '../../contexts/ColorPickerContext';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -19,7 +20,8 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
     offsetY,
     scaledImageData: scalledImageData,
   } = useImage();
-  const { activeTool: activeToolID } = useTools();
+  const { activeTool } = useTools();
+  const { setFirstColor, setSecondColor } = useColorPicker();
   const internalCanvasRef = useRef<HTMLCanvasElement>(null);
   const actualCanvasRef = (ref as React.RefObject<HTMLCanvasElement>) || internalCanvasRef;
   const [scrollX, setScrollX] = useState(0);
@@ -33,18 +35,14 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
   const handTool = useHandTool();
 
   function getCursor(activeToolID: string | null) {
-    if (activeToolID === 'hand') {
-      if (handTool.isDragging) {
-        return 'move';
-      }
-      return 'grab';
+    switch (activeToolID) {
+      case 'hand':
+        return 'grab';
+      case 'pipette':
+        return 'crosshair';
+      default:
+        return 'default';
     }
-
-    if (activeToolID === 'pipette') {
-      return 'crosshair';
-    }
-
-    return 'default';
   }
 
   const startDragging = (e: React.MouseEvent, axis: 'x' | 'y') => {
@@ -106,22 +104,93 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
     setOffsetY(clamp(offset, min, max));
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (activeToolID === 'hand') {
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (activeTool === 'hand') {
       handTool.handleMouseDown(e);
+    } else if (activeTool === 'pipette' && scalledImageData) {
+      const canvas = actualCanvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const canvasX = e.clientX - rect.left;
+      const canvasY = e.clientY - rect.top;
+
+      const imageX = canvasX - offsetX;
+      const imageY = canvasY - offsetY;
+
+      const pixelX = Math.floor(imageX);
+      const pixelY = Math.floor(imageY);
+
+      const pixel = getPixelColor(e.clientX, e.clientY);
+      if (pixel) {
+        const coords = { x: pixelX, y: pixelY };
+        if (e.altKey || e.ctrlKey || e.shiftKey) {
+          setSecondColor(pixel, coords);
+        } else {
+          setFirstColor(pixel, coords);
+        }
+      }
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (activeToolID === 'hand') {
+    if (activeTool === 'hand') {
       handTool.handleMouseMove(e);
     }
   };
 
   const handleMouseUp = () => {
-    if (activeToolID === 'hand') {
+    if (activeTool === 'hand') {
       handTool.handleMouseUp();
     }
+  };
+
+  const handleMouseLeave = () => {
+    if (activeTool === 'hand') {
+      const canvas = actualCanvasRef.current;
+      if (canvas) {
+        canvas.style.cursor = 'grab';
+      }
+    }
+  };
+
+  const handleMouseEnter = () => {
+    const canvas = actualCanvasRef.current;
+    if (!canvas) return;
+
+    if (activeTool === 'hand') {
+      canvas.style.cursor = handTool.isDragging ? 'grabbing' : 'grab';
+    } else if (activeTool === 'pipette') {
+      canvas.style.cursor = 'crosshair';
+    }
+  };
+
+  const getPixelColor = (clientX: number, clientY: number): [number, number, number, number] | null => {
+    const canvas = actualCanvasRef.current;
+    if (!canvas || !scalledImageData) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    const canvasX = clientX - rect.left;
+    const canvasY = clientY - rect.top;
+
+    const imageX = canvasX - offsetX;
+    const imageY = canvasY - offsetY;
+
+    const pixelX = Math.floor(imageX);
+    const pixelY = Math.floor(imageY);
+
+    if (pixelX < 0 || pixelX >= scalledImageData.width || 
+        pixelY < 0 || pixelY >= scalledImageData.height) {
+      return null;
+    }
+
+    const index = (pixelY * scalledImageData.width + pixelX) * 4;
+    return [
+      scalledImageData.data[index],
+      scalledImageData.data[index + 1],
+      scalledImageData.data[index + 2],
+      scalledImageData.data[index + 3]
+    ];
   };
 
   useEffect(() => {
@@ -157,6 +226,19 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
     setCanvasRef(actualCanvasRef);
   }, [actualCanvasRef, setCanvasRef, actualCanvasRef.current?.clientWidth]);
 
+  useEffect(() => {
+    const canvas = actualCanvasRef.current;
+    if (!canvas) return;
+
+    if (activeTool === 'hand') {
+      canvas.style.cursor = handTool.isDragging ? 'grabbing' : 'grab';
+    } else if (activeTool === 'pipette') {
+      canvas.style.cursor = 'crosshair';
+    } else {
+      canvas.style.cursor = 'default';
+    }
+  }, [activeTool, handTool.isDragging]);
+
   return (
     <div className={s.canvasContainer}>
       <canvas
@@ -165,9 +247,10 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onMouseEnter={handleMouseEnter}
         style={{
           imageRendering: 'auto',
-          cursor: getCursor(activeToolID),
         }}
       />
 

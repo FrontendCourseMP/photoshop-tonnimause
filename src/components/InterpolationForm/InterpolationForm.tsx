@@ -129,12 +129,12 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
   // Инициализация формы
   useEffect(() => {
     const initialValues: InterpolationFormValues = {
-  width: originalWidth,
-  height: originalHeight,
-  unit: "pixels",
-  maintainAspectRatio: true,
-  interpolationMethod: "bilinear",
-};
+      width: originalWidth,
+      height: originalHeight,
+      unit: "pixels" as const,
+      maintainAspectRatio: true,
+      interpolationMethod: "bilinear" as const
+    };
     form.setFieldsValue(initialValues);
     setFormValues(initialValues);
   }, [form, originalWidth, originalHeight]);

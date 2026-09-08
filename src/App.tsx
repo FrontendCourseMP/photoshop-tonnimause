@@ -6,8 +6,10 @@ import { Canvas } from "./modules/Canvas/Canvas";
 import { StatusBar } from "./components/StatusBar/StatusBar";
 import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
 import { ImageProvider, useImage } from "./contexts/ImageContext";
-import { ToolProvider } from "./contexts/ToolContext";
+import { ToolProvider, useTools } from "./contexts/ToolContext";
+import { ColorPickerProvider } from "./contexts/ColorPickerContext";
 import { InstrumentsPanel } from "./modules/InstrumentsPanel/InstrumentsPanel";
+import { ColorPickerWindow } from "./modules/ColorPickerWindow/ColorPickerWindow";
 import { detectImageFormat } from "./utils/ImageTypeGetter";
 import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
 import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
@@ -16,6 +18,7 @@ const { Header, Content, Sider } = Layout;
 
 function AppContent() {
   const { imageData, setImageData } = useImage();
+  const { activeTool } = useTools();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isInterpolationModalOpen, setIsInterpolationModalOpen] = useState(false);
 
@@ -95,6 +98,7 @@ function AppContent() {
           }}>
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
               <Canvas ref={canvasRef} />
+              {activeTool === 'pipette' && <ColorPickerWindow />}
             </div>
           </Content>
           <StatusBar />
@@ -113,7 +117,9 @@ function App() {
   return (
     <ToolProvider>
       <ImageProvider>
-        <AppContent />
+        <ColorPickerProvider>
+          <AppContent />
+        </ColorPickerProvider>
       </ImageProvider>
     </ToolProvider>
   );

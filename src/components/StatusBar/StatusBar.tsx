@@ -1,4 +1,4 @@
-import { Select, Space } from "antd";
+import { Select } from "antd";
 import { useImage } from "../../contexts/ImageContext";
 import styles from "./StatusBar.module.scss";
 
@@ -30,13 +30,13 @@ export function StatusBar() {
 
       <div className={styles.statusItem}>
         <span className={styles.label}>Масштаб:</span>
-        <Select
+        <Select<number>
           value={scaleValue}
           onChange={setScaleValue}
           options={scaleOptions}
           className={styles.scaleSelect}
           disabled={!imageData}
-          popupMatchSelectWidth={false}
+          dropdownMatchSelectWidth={false}
         />
       </div>
     </div>
