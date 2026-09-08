@@ -2,15 +2,17 @@ import { useRef, useState } from "react";
 import { Button, Layout, Space, Upload, message } from "antd";
 import { UploadOutlined, ExpandOutlined } from "@ant-design/icons";
 import type { RcFile } from "antd/es/upload/interface";
-import { Canvas } from "./components/Canvas/Canvas";
+import { Canvas } from "./modules/Canvas/Canvas";
 import { StatusBar } from "./components/StatusBar/StatusBar";
 import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
 import { ImageProvider, useImage } from "./contexts/ImageContext";
+import { ToolProvider } from "./contexts/ToolContext";
+import { InstrumentsPanel } from "./modules/InstrumentsPanel/InstrumentsPanel";
 import { detectImageFormat } from "./utils/ImageTypeGetter";
 import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
 import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
 
-const { Header, Content } = Layout;
+const { Header, Content, Sider } = Layout;
 
 function AppContent() {
   const { imageData, setImageData } = useImage();
@@ -81,17 +83,22 @@ function AppContent() {
       </Header>
 
       <Layout style={{ height: "calc(100vh - 64px)" }}>
-        <Content style={{ 
-          display: "flex", 
-          flexDirection: "column",
-          height: "100%",
-          overflow: "hidden"
-        }}>
-          <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
-            <Canvas ref={canvasRef} />
-          </div>
-        </Content>
-        <StatusBar />
+        <Sider width={56} theme="light" style={{ borderRight: '1px solid #d9d9d9' }}>
+          <InstrumentsPanel />
+        </Sider>
+        <Layout>
+          <Content style={{ 
+            display: "flex", 
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden"
+          }}>
+            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+              <Canvas ref={canvasRef} />
+            </div>
+          </Content>
+          <StatusBar />
+        </Layout>
       </Layout>
 
       <InterpolationModal
@@ -104,9 +111,11 @@ function AppContent() {
 
 function App() {
   return (
-    <ImageProvider>
-      <AppContent />
-    </ImageProvider>
+    <ToolProvider>
+      <ImageProvider>
+        <AppContent />
+      </ImageProvider>
+    </ToolProvider>
   );
 }
 
