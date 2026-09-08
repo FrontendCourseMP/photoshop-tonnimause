@@ -28,7 +28,7 @@ body {
   color: #213547;
   background-color: #ffffff;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden; /* Убираем все скроллбары */
 }
 
 /* Настройки для корневого элемента */

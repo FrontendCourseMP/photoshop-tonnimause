@@ -1,20 +1,23 @@
 /**
  * Основной компонент приложения для обработки изображений
  * Поддерживает форматы PNG, JPG и кастомный GrayBit-7
+ * Лабораторная работа №2: Добавлен функционал масштабирования изображений
  */
 
 import { useState, useCallback } from "react";
-import { Button, Layout, Space, Typography, Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Button, Layout, Space, Typography, Upload, message, Slider, Select } from "antd";
+import { UploadOutlined, ExpandOutlined } from "@ant-design/icons";
 import type { RcFile } from "antd/es/upload/interface";
 
 // Компоненты
 import Canvas from "./components/Canvas/Canvas";
+import ScaleModal from "./components/ScaleModal/ScaleModal";
 
 // Утилиты
 import { detectImageFormat, type SupportedImageFormat } from "./utils/ImageTypeGetter";
 import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
 import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
+import { scaleImage, type ScaleParams, type InterpolationMethod } from "./utils/ImageInterpolation";
 
 // Типы
 interface ImageInfo {
@@ -40,8 +43,14 @@ const { Text } = Typography;
 function App(): React.JSX.Element {
   // Состояние приложения
   const [imageData, setImageData] = useState<ImageData | null>(null);
+  const [originalImageData, setOriginalImageData] = useState<ImageData | null>(null);
   const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  
+  // Состояние для масштабирования
+  const [scaleModalVisible, setScaleModalVisible] = useState<boolean>(false);
+  const [displayScale, setDisplayScale] = useState<number>(100);
+  const [interpolationMethod, setInterpolationMethod] = useState<InterpolationMethod>('bilinear');
 
   /**
    * Обработчик загрузки файла
@@ -82,11 +91,13 @@ function App(): React.JSX.Element {
 
       // Обновляем состояние
       setImageData(newImageData);
+      setOriginalImageData(newImageData); // Сохраняем оригинальное изображение
       setImageInfo({
         width: newImageData.width,
         height: newImageData.height,
         colorDepth,
       });
+      setDisplayScale(100); // Сбрасываем масштаб отображения
 
       message.success("✅ Изображение успешно загружено");
       return false; // Предотвращаем стандартное поведение загрузки
@@ -106,11 +117,74 @@ function App(): React.JSX.Element {
     console.log("🎨 Canvas готов к работе");
   }, []);
 
+  /**
+   * Обработчик открытия модального окна масштабирования
+   */
+  const handleOpenScaleModal = useCallback((): void => {
+    if (!originalImageData) {
+      message.warning("⚠️ Сначала загрузите изображение");
+      return;
+    }
+    setScaleModalVisible(true);
+  }, [originalImageData]);
+
+  /**
+   * Обработчик закрытия модального окна масштабирования
+   */
+  const handleCloseScaleModal = useCallback((): void => {
+    setScaleModalVisible(false);
+  }, []);
+
+  /**
+   * Обработчик применения масштабирования
+   */
+  const handleApplyScaling = useCallback((params: ScaleParams) => {
+    if (!originalImageData) {
+      message.error("❌ Нет исходного изображения для масштабирования");
+      return;
+    }
+
+    try {
+      console.log("🔄 Применяем масштабирование:", params);
+      
+      // Применяем масштабирование
+      const scaledImageData = scaleImage(originalImageData, params);
+      
+      // Обновляем состояние
+      setImageData(scaledImageData);
+      setImageInfo({
+        width: scaledImageData.width,
+        height: scaledImageData.height,
+        colorDepth: imageInfo?.colorDepth || 24
+      });
+      
+      setScaleModalVisible(false);
+      message.success("✅ Изображение успешно масштабировано");
+    } catch (error) {
+      console.error("❌ Ошибка при масштабировании:", error);
+      message.error("❌ Ошибка при масштабировании изображения");
+    }
+  }, [originalImageData, imageInfo]);
+
+  /**
+   * Обработчик изменения масштаба отображения
+   */
+  const handleDisplayScaleChange = useCallback((value: number) => {
+    setDisplayScale(value);
+  }, []);
+
+  /**
+   * Обработчик изменения метода интерполяции
+   */
+  const handleInterpolationMethodChange = useCallback((value: InterpolationMethod) => {
+    setInterpolationMethod(value);
+  }, []);
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      {/* Заголовок с кнопкой загрузки */}
+      {/* Заголовок с кнопками управления */}
       <Header style={{ padding: "0 16px", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-        <Space>
+        <Space wrap>
           <Upload
             accept={SUPPORTED_FORMATS}
             showUploadList={false}
@@ -127,15 +201,60 @@ function App(): React.JSX.Element {
               {loading ? UPLOAD_BUTTON_TEXT.loading : UPLOAD_BUTTON_TEXT.default}
             </Button>
           </Upload>
+          
+          {/* Кнопка масштабирования */}
+          <Button
+            icon={<ExpandOutlined />}
+            onClick={handleOpenScaleModal}
+            disabled={!imageData || loading}
+            size="large"
+          >
+            Изменить размер
+          </Button>
+          
+          {/* Элементы управления масштабом отображения */}
+          {imageData && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Text strong>Масштаб:</Text>
+                <Slider
+                  min={12}
+                  max={300}
+                  value={displayScale}
+                  onChange={handleDisplayScaleChange}
+                  style={{ width: 120 }}
+                  tooltip={{ formatter: (value) => `${value}%` }}
+                />
+                <Text>{displayScale}%</Text>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Text strong>Интерполяция:</Text>
+                <Select
+                  value={interpolationMethod}
+                  onChange={handleInterpolationMethodChange}
+                  style={{ width: 150 }}
+                  options={[
+                    { value: 'bilinear', label: 'Билинейная' },
+                    { value: 'nearest-neighbor', label: 'Ближайший сосед' }
+                  ]}
+                />
+              </div>
+            </>
+          )}
         </Space>
       </Header>
 
       {/* Основной контент с canvas */}
       <Content style={{ padding: "16px", display: "flex", flex: 1 }}>
-        <Canvas 
-          imageData={imageData} 
-          onCanvasReady={handleCanvasReady}
-        />
+        {imageData && (
+          <Canvas 
+            imageData={imageData} 
+            onCanvasReady={handleCanvasReady}
+            displayScale={displayScale}
+            interpolationMethod={interpolationMethod}
+          />
+        )}
       </Content>
 
       {/* Подвал с информацией об изображении */}
@@ -143,7 +262,9 @@ function App(): React.JSX.Element {
         textAlign: "center", 
         padding: "10px 16px", 
         background: "#f5f5f5",
-        borderTop: "1px solid #d9d9d9"
+        borderTop: "1px solid #d9d9d9",
+        position: 'sticky',
+        bottom: 0
       }}>
         {imageInfo ? (
           <Space split={<Text type="secondary">|</Text>}>
@@ -155,6 +276,14 @@ function App(): React.JSX.Element {
           <Text type="secondary">Выберите изображение для отображения информации</Text>
         )}
       </Footer>
+
+      {/* Модальное окно масштабирования */}
+      <ScaleModal
+        visible={scaleModalVisible}
+        onCancel={handleCloseScaleModal}
+        onApply={handleApplyScaling}
+        originalImageData={originalImageData}
+      />
     </Layout>
   );
 }

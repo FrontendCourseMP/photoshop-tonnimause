@@ -13,15 +13,15 @@ $canvas-transition: all 0.3s ease;
 .canvasWrapper {
   position: relative;
   flex: 1;
-  overflow: hidden;
+  overflow: auto; // Разрешает прокрутку, если изображение выходит за пределы
   background: $canvas-bg;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: calc(100vh - 128px); // Вычитаем высоту header и footer
   padding: 16px;
   border-radius: $canvas-border-radius;
   transition: $canvas-transition;
+  display: flex; // Возвращаем flexbox, но с другими параметрами
+  justify-content: center; // Центрируем по горизонтали
+  align-items: center; // Центрируем по вертикали
 
   // Эффект при наведении
   &:hover {
@@ -45,8 +45,6 @@ $canvas-transition: all 0.3s ease;
   background: white;
   box-shadow: $canvas-shadow;
   border-radius: $canvas-border-radius;
-  max-width: 100%;
-  max-height: 100%;
   transition: $canvas-transition;
   cursor: default;
 

@@ -12,20 +12,28 @@ interface CanvasProps {
   imageData: ImageData | null;
   /** Callback при готовности canvas */
   onCanvasReady: (canvas: HTMLCanvasElement) => void;
+  /** Масштаб отображения в процентах */
+  displayScale?: number;
+  /** Метод интерполяции для отображения */
+  interpolationMethod?: 'nearest-neighbor' | 'bilinear';
 }
 
 // Константы
 const DEFAULT_CANVAS_SIZE = 600;
 const CANVAS_PADDING = 32;
-const MAX_SCALE = 1.0;
 
 /**
  * Компонент Canvas для отображения изображений
  */
-function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
+function Canvas({ imageData, onCanvasReady, displayScale = 100, interpolationMethod = 'bilinear' }: CanvasProps): React.JSX.Element {
   // Рефы для DOM элементов
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Состояние для перетаскивания
+  const isDraggingRef = useRef(false);
+  const lastXRef = useRef(0);
+  const lastYRef = useRef(0);
 
   /**
    * Обновляет размеры canvas в соответствии с размерами контейнера
@@ -55,27 +63,23 @@ function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
       console.log("🎨 Установлен базовый размер canvas:", { width: size, height: size });
       return undefined;
     }
-
-    // Вычисляем масштаб для вписывания изображения
-    const availableWidth = wrapperWidth - CANVAS_PADDING;
-    const availableHeight = wrapperHeight - CANVAS_PADDING;
     
-    const scaleX = availableWidth / imageData.width;
-    const scaleY = availableHeight / imageData.height;
-    const scale = Math.min(scaleX, scaleY, MAX_SCALE);
+    // Используем только displayScale для определения финального масштаба
+    const finalScale = displayScale / 100;
 
     // Устанавливаем размеры canvas
-    canvas.width = Math.floor(imageData.width * scale);
-    canvas.height = Math.floor(imageData.height * scale);
+    canvas.width = Math.floor(imageData.width * finalScale);
+    canvas.height = Math.floor(imageData.height * finalScale);
 
     console.log("🎨 Canvas настроен:", {
       imageSize: { width: imageData.width, height: imageData.height },
-      scale,
+      userScale: displayScale,
+      finalScale,
       canvasSize: { width: canvas.width, height: canvas.height }
     });
 
-    return scale;
-  }, [imageData]);
+    return finalScale;
+  }, [imageData, displayScale]);
 
   /**
    * Рендерит изображение на canvas
@@ -112,9 +116,13 @@ function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
     // Рисуем оригинальное изображение на временном canvas
     tempCtx.putImageData(imageData, 0, 0);
 
-    // Настройки сглаживания для высокого качества
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    // Настройки сглаживания в зависимости от метода интерполяции
+    if (interpolationMethod === 'nearest-neighbor') {
+      ctx.imageSmoothingEnabled = false;
+    } else {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+    }
 
     // Рисуем масштабированное изображение на основном canvas
     ctx.drawImage(
@@ -124,7 +132,48 @@ function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
     );
 
     console.log("✅ Изображение успешно отрендерено");
-  }, [imageData]);
+  }, [imageData, interpolationMethod]);
+  
+  /**
+   * Обработчик начала перетаскивания
+   * @param event - событие мыши
+   */
+  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    isDraggingRef.current = true;
+    lastXRef.current = event.clientX;
+    lastYRef.current = event.clientY;
+    document.body.style.userSelect = 'none'; // Запретить выделение текста при перетаскивании
+    document.body.style.cursor = 'grabbing';
+  }, []);
+
+  /**
+   * Обработчик перетаскивания
+   * @param event - событие мыши
+   */
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    
+    const dx = event.clientX - lastXRef.current;
+    const dy = event.clientY - lastYRef.current;
+    
+    const wrapper = wrapperRef.current;
+    if (wrapper) {
+      wrapper.scrollTop -= dy;
+      wrapper.scrollLeft -= dx;
+    }
+
+    lastXRef.current = event.clientX;
+    lastYRef.current = event.clientY;
+  }, []);
+
+  /**
+   * Обработчик окончания перетаскивания
+   */
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    document.body.style.userSelect = ''; // Восстановить выделение текста
+    document.body.style.cursor = 'default';
+  }, []);
 
   /**
    * Обработчик изменения размера окна
@@ -150,17 +199,47 @@ function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
     }
   }, [onCanvasReady, updateCanvasSize]);
 
-  // Обработка изменения данных изображения
+  // Обработка изменения данных изображения и добавление обработчиков событий
   useEffect(() => {
     console.log("🖼️ Данные изображения изменились:", imageData ? "присутствуют" : "отсутствуют");
+    
+    const canvas = canvasRef.current;
+    if (canvas) {
+      if (imageData) {
+        updateCanvasSize();
+        renderImage();
+      } else {
+        updateCanvasSize();
+      }
+    }
+    
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [imageData, updateCanvasSize, renderImage, handleMouseMove, handleMouseUp]);
+
+  // Обработка изменения масштаба отображения
+  useEffect(() => {
+    console.log("🔍 Масштаб отображения изменился:", displayScale);
     
     if (imageData) {
       updateCanvasSize();
       renderImage();
-    } else {
-      updateCanvasSize();
     }
-  }, [imageData, updateCanvasSize, renderImage]);
+  }, [displayScale, imageData, updateCanvasSize, renderImage]);
+
+  // Обработка изменения метода интерполяции
+  useEffect(() => {
+    console.log("🎨 Метод интерполяции изменился:", interpolationMethod);
+    
+    if (imageData) {
+      renderImage();
+    }
+  }, [interpolationMethod, imageData, renderImage]);
 
   // Обработка изменения размера окна
   useEffect(() => {
@@ -179,6 +258,7 @@ function Canvas({ imageData, onCanvasReady }: CanvasProps): React.JSX.Element {
       <canvas 
         ref={canvasRef} 
         className={styles.canvas}
+        onMouseDown={handleMouseDown}
         aria-label={imageData ? "Изображение" : "Пустой canvas"}
       />
     </div>
