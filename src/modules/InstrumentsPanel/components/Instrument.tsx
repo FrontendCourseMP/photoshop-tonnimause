@@ -11,14 +11,20 @@ interface InstrumentProps {
   name: string;
   description: string;
   hotkey: string;
+  onClick?: () => void;
 }
 
-export function Instrument({ id, icon: Icon, name, description }: InstrumentProps) {
+export function Instrument({ id, icon: Icon, name, description, onClick }: InstrumentProps) {
   const { activeTool, setActiveTool } = useTools();
   const isActive = activeTool === id;
   void name;
+  
   const handleClick = () => {
-    setActiveTool(isActive ? null : id);
+    if (onClick) {
+      onClick();
+    } else {
+      setActiveTool(isActive ? null : id);
+    }
   };
 
   return (

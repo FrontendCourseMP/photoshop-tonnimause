@@ -1,8 +1,8 @@
-import { useHotkeys } from 'react-hotkeys-hook';
-import { useTools } from '../../contexts/ToolContext';
-import { Instrument } from './components/Instrument';
-import { instruments } from './Instruments';
-import styles from './InstrumentsPanel.module.scss';
+import { useHotkeys } from "react-hotkeys-hook";
+import { useTools } from "../../contexts/ToolContext";
+import { Instrument } from "./components/Instrument";
+import { instruments } from "./Instruments";
+import styles from "./InstrumentsPanel.module.scss";
 
 export function InstrumentsPanel() {
   const { setActiveTool } = useTools();
@@ -21,4 +21,4 @@ export function InstrumentsPanel() {
       ))}
     </div>
   );
-} 
+}

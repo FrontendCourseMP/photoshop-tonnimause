@@ -1,6 +1,8 @@
+import React from "react";
 import { Button, Layout, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import type { RcFile } from "antd/es/upload/interface";
+import { useHotkeys } from "react-hotkeys-hook";
 import { ImageProvider } from "./contexts/ImageContext";
 import { LayersProvider, useLayers } from "./contexts/LayersContext";
 import { ToolProvider, useTools } from "./contexts/ToolContext";
@@ -14,12 +16,21 @@ import { detectImageFormat } from "./utils/ImageTypeGetter";
 import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
 import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
 import styles from "./App.module.scss";
+import { CorrectionModal } from "./modules/Curves/CorrectionModal/CorrectionModal";
+import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
 
 const { Header, Sider, Content } = Layout;
 
 function AppContent() {
   const { addLayer, layers, activeLayerId, updateLayer } = useLayers();
   const { activeTool } = useTools();
+  const [isCorrectionModalOpen, setCorrectionModalOpen] = React.useState(false);
+  const [isResizeModalOpen, setResizeModalOpen] = React.useState(false);
+
+  // Горячая клавиша для открытия модального окна интерполяции
+  useHotkeys('r', () => {
+    setResizeModalOpen(true);
+  });
 
   const handleFileChange = async (file: RcFile) => {
     try {
@@ -49,7 +60,7 @@ function AppContent() {
           name: file.name,
           colorDepth,
           hasAlphaChannel: true,
-          alphaChannelVisible: true
+          alphaChannelVisible: true,
         });
       }
 
@@ -64,6 +75,16 @@ function AppContent() {
 
   return (
     <Layout className={styles.layout}>
+      <CorrectionModal
+        isOpen={isCorrectionModalOpen}
+        onClose={() => setCorrectionModalOpen(false)}
+      />
+
+      <InterpolationModal
+        isOpen={isResizeModalOpen}
+        onClose={() => setResizeModalOpen(false)}
+      />
+
       <Layout>
         <Header className={styles.header}>
           <Upload
@@ -73,6 +94,10 @@ function AppContent() {
           >
             <Button icon={<UploadOutlined />}>Загрузить изображение</Button>
           </Upload>
+          <Button onClick={() => setResizeModalOpen(true)}>Интерполяция</Button>
+          <Button onClick={() => setCorrectionModalOpen(true)}>
+            Градационная коррекция
+          </Button>
         </Header>
         <Layout>
           <Sider width={56} className={styles.leftSider}>
@@ -80,7 +105,7 @@ function AppContent() {
           </Sider>
           <Content className={styles.content}>
             <Canvas />
-            {activeTool === 'pipette' && <ColorPickerWindow />}
+            {activeTool === "pipette" && <ColorPickerWindow />}
           </Content>
           <Sider width={280} className={styles.rightSider}>
             <LayerPanel />

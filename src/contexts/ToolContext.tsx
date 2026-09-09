@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 
-export type Tool = 'hand' | 'pipette' | null;
+export type Tool = 'hand' | 'pipette' | 'resize' | null;
 
 interface ToolContextType {
   activeTool: Tool;

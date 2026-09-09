@@ -1,4 +1,4 @@
-import { DragOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { DragOutlined, ExperimentOutlined, ExpandOutlined } from '@ant-design/icons';
 import type { Tool } from '../../contexts/ToolContext';
 
 interface Instrument {
@@ -23,5 +23,12 @@ export const instruments: Instrument[] = [
     name: 'Пипетка',
     description: 'Выбор цвета (I)',
     hotkey: 'i',
+  },
+  {
+    id: 'resize',
+    icon: ExpandOutlined,
+    name: 'Изменить размер',
+    description: 'Изменение размера изображения (R)',
+    hotkey: 'r',
   },
 ]; 

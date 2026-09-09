@@ -20,6 +20,9 @@
   border-bottom: 1px solid #d9d9d9;
   height: 48px;
   line-height: 48px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 
   h1 {
     margin: 0;
@@ -29,8 +32,8 @@
 
 .content {
   position: relative;
-  height: calc(100vh - 48px - 24px); // вычитаем высоту header и statusbar
+  height: calc(100vh - 48px - 40px); // вычитаем высоту header и statusbar
   background: #f0f2f5;
   padding: 16px;
   overflow: hidden;
-} 
+}

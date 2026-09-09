@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useImage } from "./ImageContext";
 
 export type BlendMode = "normal" | "multiply" | "screen" | "overlay";
@@ -39,6 +39,7 @@ interface LayersContextProps {
   setColorDepth: (id: string, depth: number) => void;
   setIsGrayscale: (id: string, isGrayscale: boolean) => void;
   updateLayer: (id: string, updates: Partial<Layer>) => void;
+  setOriginalImageData: (id: string, data: ImageData) => void;
 }
 
 const LayersContext = createContext<LayersContextProps | null>(null);
@@ -73,7 +74,7 @@ function createEmptyLayer(id: string): Layer {
     alphaChannelPreview: "",
     colorDepth: 0,
     isGrayscale: false,
-    name: `Слой ${id}`
+    name: `Слой ${id}`,
   };
 }
 
@@ -82,17 +83,20 @@ function createPreview(imageData: ImageData): string {
   if (!previewCanvas) {
     previewCanvas = document.createElement("canvas");
   }
-  
+
   // Масштабируем превью для экономии памяти
-  const scale = Math.min(1, PREVIEW_MAX_SIZE / Math.max(imageData.width, imageData.height));
+  const scale = Math.min(
+    1,
+    PREVIEW_MAX_SIZE / Math.max(imageData.width, imageData.height),
+  );
   const width = Math.floor(imageData.width * scale);
   const height = Math.floor(imageData.height * scale);
-  
+
   previewCanvas.width = width;
   previewCanvas.height = height;
   const ctx = previewCanvas.getContext("2d");
   if (!ctx) return "";
-  
+
   // Создаем временный canvas для масштабирования
   if (!blendCanvas) {
     blendCanvas = document.createElement("canvas");
@@ -101,16 +105,16 @@ function createPreview(imageData: ImageData): string {
   blendCanvas.height = imageData.height;
   const tempCtx = blendCanvas.getContext("2d");
   if (!tempCtx) return "";
-  
+
   tempCtx.putImageData(imageData, 0, 0);
   ctx.drawImage(blendCanvas, 0, 0, width, height);
-  
+
   const preview = previewCanvas.toDataURL("image/jpeg", 0.8);
-  
+
   // Очищаем canvas
   ctx.clearRect(0, 0, width, height);
   tempCtx.clearRect(0, 0, blendCanvas.width, blendCanvas.height);
-  
+
   return preview;
 }
 
@@ -119,30 +123,33 @@ function createAlphaPreview(imageData: ImageData): string {
   if (!alphaPreviewCanvas) {
     alphaPreviewCanvas = document.createElement("canvas");
   }
-  
+
   // Масштабируем превью
-  const scale = Math.min(1, PREVIEW_MAX_SIZE / Math.max(imageData.width, imageData.height));
+  const scale = Math.min(
+    1,
+    PREVIEW_MAX_SIZE / Math.max(imageData.width, imageData.height),
+  );
   const width = Math.floor(imageData.width * scale);
   const height = Math.floor(imageData.height * scale);
-  
+
   alphaPreviewCanvas.width = width;
   alphaPreviewCanvas.height = height;
   const ctx = alphaPreviewCanvas.getContext("2d");
   if (!ctx) return "";
 
   const alphaData = ctx.createImageData(width, height);
-  
+
   // Масштабируем и копируем альфа-канал
   const scaleX = imageData.width / width;
   const scaleY = imageData.height / height;
-  
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const srcX = Math.floor(x * scaleX);
       const srcY = Math.floor(y * scaleY);
       const srcIdx = (srcY * imageData.width + srcX) * 4;
       const destIdx = (y * width + x) * 4;
-      
+
       const alpha = imageData.data[srcIdx + 3];
       alphaData.data[destIdx] = alpha;
       alphaData.data[destIdx + 1] = alpha;
@@ -153,10 +160,10 @@ function createAlphaPreview(imageData: ImageData): string {
 
   ctx.putImageData(alphaData, 0, 0);
   const preview = alphaPreviewCanvas.toDataURL("image/jpeg", 0.8);
-  
+
   // Очищаем canvas
   ctx.clearRect(0, 0, width, height);
-  
+
   return preview;
 }
 
@@ -176,16 +183,21 @@ function removeAlphaChannel(imageData: ImageData): ImageData {
 const blendBuffer = {
   imageData: null as ImageData | null,
   width: 0,
-  height: 0
+  height: 0,
 };
 
-function applyBlendMode(bottom: ImageData, top: ImageData, mode: BlendMode, opacity: number): ImageData {
+function applyBlendMode(
+  bottom: ImageData,
+  top: ImageData,
+  mode: BlendMode,
+  opacity: number,
+): ImageData {
   const maxWidth = Math.max(bottom.width, top.width);
   const maxHeight = Math.max(bottom.height, top.height);
-  
+
   // Создаем новый буфер для результата
   const result = new ImageData(maxWidth, maxHeight);
-  
+
   // Копируем нижний слой
   for (let y = 0; y < maxHeight; y++) {
     for (let x = 0; x < maxWidth; x++) {
@@ -232,9 +244,18 @@ function applyBlendMode(bottom: ImageData, top: ImageData, mode: BlendMode, opac
             b = 255 - ((255 - b1) * (255 - b2)) / 255;
             break;
           case "overlay":
-            r = r1 < 128 ? (2 * r1 * r2) / 255 : 255 - (2 * (255 - r1) * (255 - r2)) / 255;
-            g = g1 < 128 ? (2 * g1 * g2) / 255 : 255 - (2 * (255 - g1) * (255 - g2)) / 255;
-            b = b1 < 128 ? (2 * b1 * b2) / 255 : 255 - (2 * (255 - b1) * (255 - b2)) / 255;
+            r =
+              r1 < 128
+                ? (2 * r1 * r2) / 255
+                : 255 - (2 * (255 - r1) * (255 - r2)) / 255;
+            g =
+              g1 < 128
+                ? (2 * g1 * g2) / 255
+                : 255 - (2 * (255 - g1) * (255 - g2)) / 255;
+            b =
+              b1 < 128
+                ? (2 * b1 * b2) / 255
+                : 255 - (2 * (255 - b1) * (255 - b2)) / 255;
             break;
           default: // normal
             r = r2;
@@ -262,46 +283,58 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
   const [layers, setLayers] = useState<Layer[]>([]);
   const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
   const { setImageData } = useImage();
-  
+
   // Используем useRef для хранения предыдущего состояния слоев
   const prevLayersRef = useRef<Layer[]>([]);
-  
+
   // Оптимизированное обновление финального изображения
   useEffect(() => {
     // Проверяем, действительно ли нужно обновлять изображение
-    console.log('Current layers:', layers.map(l => ({ id: l.id, name: l.name })));
-    console.log('Previous layers:', prevLayersRef.current.map(l => ({ id: l.id, name: l.name })));
-    
-    const hasVisibleChanges = layers.length !== prevLayersRef.current.length || 
+    console.log(
+      "Current layers:",
+      layers.map((l) => ({ id: l.id, name: l.name })),
+    );
+    console.log(
+      "Previous layers:",
+      prevLayersRef.current.map((l) => ({ id: l.id, name: l.name })),
+    );
+
+    const hasVisibleChanges =
+      layers.length !== prevLayersRef.current.length ||
       layers.some((layer, index) => {
-      const prevLayer = prevLayersRef.current[index];
-      const changes = !prevLayer ||
-        layer.id !== prevLayer.id || // Проверяем изменение порядка
-        layer.visible !== prevLayer.visible ||
-        layer.opacity !== prevLayer.opacity ||
-        layer.blendMode !== prevLayer.blendMode ||
-        layer.editedImageData !== prevLayer.editedImageData;
-      
-      if (changes) {
-        console.log('Layer changed:', { 
-          layerId: layer.id, 
-          reason: {
-            noPrevLayer: !prevLayer,
-            idChanged: prevLayer && layer.id !== prevLayer.id,
-            visibilityChanged: prevLayer && layer.visible !== prevLayer.visible,
-            opacityChanged: prevLayer && layer.opacity !== prevLayer.opacity,
-            blendModeChanged: prevLayer && layer.blendMode !== prevLayer.blendMode,
-            imageDataChanged: prevLayer && layer.editedImageData !== prevLayer.editedImageData
-          }
-        });
-      }
-      return changes;
-    });
-    
-    console.log('Has visible changes:', hasVisibleChanges);
-    
+        const prevLayer = prevLayersRef.current[index];
+        const changes =
+          !prevLayer ||
+          layer.id !== prevLayer.id || // Проверяем изменение порядка
+          layer.visible !== prevLayer.visible ||
+          layer.opacity !== prevLayer.opacity ||
+          layer.blendMode !== prevLayer.blendMode ||
+          layer.editedImageData !== prevLayer.editedImageData;
+
+        if (changes) {
+          console.log("Layer changed:", {
+            layerId: layer.id,
+            reason: {
+              noPrevLayer: !prevLayer,
+              idChanged: prevLayer && layer.id !== prevLayer.id,
+              visibilityChanged:
+                prevLayer && layer.visible !== prevLayer.visible,
+              opacityChanged: prevLayer && layer.opacity !== prevLayer.opacity,
+              blendModeChanged:
+                prevLayer && layer.blendMode !== prevLayer.blendMode,
+              imageDataChanged:
+                prevLayer &&
+                layer.editedImageData !== prevLayer.editedImageData,
+            },
+          });
+        }
+        return changes;
+      });
+
+    console.log("Has visible changes:", hasVisibleChanges);
+
     if (!hasVisibleChanges) return;
-    
+
     const updateFinalImage = () => {
       if (layers.length === 0) {
         setImageData(new ImageData(1, 1));
@@ -309,8 +342,13 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Фильтруем только видимые слои и разворачиваем их для соответствия UI
-      const visibleLayers = layers.filter(layer => layer.visible && layer.editedImageData).reverse();
-      console.log('Visible layers order for blending:', visibleLayers.map(l => ({ id: l.id, name: l.name })));
+      const visibleLayers = layers
+        .filter((layer) => layer.visible && layer.editedImageData)
+        .reverse();
+      console.log(
+        "Visible layers order for blending:",
+        visibleLayers.map((l) => ({ id: l.id, name: l.name })),
+      );
 
       if (visibleLayers.length === 0) {
         setImageData(new ImageData(1, 1));
@@ -318,15 +356,24 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Находим максимальные размеры
-      const maxWidth = Math.max(...visibleLayers.map(layer => layer.editedImageData!.width));
-      const maxHeight = Math.max(...visibleLayers.map(layer => layer.editedImageData!.height));
+      const maxWidth = Math.max(
+        ...visibleLayers.map((layer) => layer.editedImageData!.width),
+      );
+      const maxHeight = Math.max(
+        ...visibleLayers.map((layer) => layer.editedImageData!.height),
+      );
 
       // Создаем пустой результат
       let result = new ImageData(maxWidth, maxHeight);
 
       // Накладываем слои в обратном порядке (как в UI)
       for (const layer of visibleLayers) {
-        result = applyBlendMode(result, layer.editedImageData!, layer.blendMode, layer.opacity);
+        result = applyBlendMode(
+          result,
+          layer.editedImageData!,
+          layer.blendMode,
+          layer.opacity,
+        );
       }
 
       setImageData(result);
@@ -334,7 +381,7 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
 
     // Запускаем обновление только когда необходимо
     updateFinalImage();
-    
+
     // Сохраняем текущее состояние слоев
     prevLayersRef.current = layers;
   }, [layers, setImageData]);
@@ -372,93 +419,97 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
       preview: imageData ? createPreview(imageData) : "",
       alphaChannelPreview: imageData ? createAlphaPreview(imageData) : "",
       hasAlphaChannel: !!imageData,
-      name: `Слой ${layers.length + 1}`
+      name: `Слой ${layers.length + 1}`,
     };
 
-    setLayers(prev => [...prev, newLayer]);
+    setLayers((prev) => [...prev, newLayer]);
     setActiveLayerId(id);
   };
 
   const removeLayer = (id: string) => {
-    setLayers(prev => prev.filter(layer => layer.id !== id));
+    setLayers((prev) => prev.filter((layer) => layer.id !== id));
     if (activeLayerId === id) {
       setActiveLayerId(null);
     }
   };
 
   const moveLayer = (fromIndex: number, toIndex: number) => {
-    console.log('Moving layer:', { fromIndex, toIndex });
-    setLayers(prev => {
+    console.log("Moving layer:", { fromIndex, toIndex });
+    setLayers((prev) => {
       const newLayers = [...prev];
       const [removed] = newLayers.splice(fromIndex, 1);
       newLayers.splice(toIndex, 0, removed);
-      console.log('New layers order:', newLayers.map(l => ({ id: l.id, name: l.name })));
+      console.log(
+        "New layers order:",
+        newLayers.map((l) => ({ id: l.id, name: l.name })),
+      );
       return newLayers;
     });
   };
 
   const toggleLayerVisibility = (id: string) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === id ? { ...layer, visible: !layer.visible } : layer
-      )
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, visible: !layer.visible } : layer,
+      ),
     );
   };
 
   const setLayerOpacity = (id: string, opacity: number) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === id ? { ...layer, opacity: opacity / 100 } : layer
-      )
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, opacity: opacity / 100 } : layer,
+      ),
     );
   };
 
   const setLayerBlendMode = (id: string, mode: BlendMode) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === id ? { ...layer, blendMode: mode } : layer
-      )
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, blendMode: mode } : layer,
+      ),
     );
   };
 
   const updateLayerPreview = (id: string) => {
-    setLayers(prev =>
-      prev.map(layer => {
+    setLayers((prev) =>
+      prev.map((layer) => {
         if (layer.id === id && layer.editedImageData) {
           return {
             ...layer,
             preview: createPreview(layer.editedImageData),
-            alphaChannelPreview: createAlphaPreview(layer.editedImageData)
+            alphaChannelPreview: createAlphaPreview(layer.editedImageData),
           };
         }
         return layer;
-      })
+      }),
     );
   };
 
   const toggleAlphaVisibility = (id: string) => {
-    setLayers(prev =>
-      prev.map(layer => {
+    setLayers((prev) =>
+      prev.map((layer) => {
         if (layer.id === id) {
           const alphaVisible = !layer.alphaChannelVisible;
           const editedImageData = alphaVisible
             ? layer.originalImageData
-            : layer.originalImageData && removeAlphaChannel(layer.originalImageData);
+            : layer.originalImageData &&
+              removeAlphaChannel(layer.originalImageData);
 
           return {
             ...layer,
             alphaChannelVisible: alphaVisible,
-            editedImageData: editedImageData || null
+            editedImageData: editedImageData || null,
           };
         }
         return layer;
-      })
+      }),
     );
   };
 
   const deleteAlphaChannel = (id: string) => {
-    setLayers(prev =>
-      prev.map(layer => {
+    setLayers((prev) =>
+      prev.map((layer) => {
         if (layer.id === id && layer.originalImageData) {
           const newImageData = removeAlphaChannel(layer.originalImageData);
           return {
@@ -466,43 +517,64 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
             hasAlphaChannel: false,
             alphaChannelVisible: false,
             originalImageData: newImageData,
-            editedImageData: newImageData
+            editedImageData: newImageData,
           };
         }
         return layer;
-      })
+      }),
     );
   };
 
   const setColorDepth = (id: string, depth: number) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === id ? { ...layer, colorDepth: depth } : layer
-      )
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, colorDepth: depth } : layer,
+      ),
     );
   };
 
   const setIsGrayscale = (id: string, isGrayscale: boolean) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === id ? { ...layer, isGrayscale } : layer
-      )
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, isGrayscale } : layer,
+      ),
     );
   };
 
   const updateLayer = (id: string, updates: Partial<Layer>) => {
-    setLayers(prev =>
-      prev.map(layer => {
+    setLayers((prev) =>
+      prev.map((layer) => {
         if (layer.id === id) {
           const updatedLayer = { ...layer, ...updates };
           if (updates.editedImageData) {
             updatedLayer.preview = createPreview(updates.editedImageData);
-            updatedLayer.alphaChannelPreview = createAlphaPreview(updates.editedImageData);
+            updatedLayer.alphaChannelPreview = createAlphaPreview(
+              updates.editedImageData,
+            );
           }
           return updatedLayer;
         }
         return layer;
-      })
+      }),
+    );
+  };
+
+  const setOriginalImageData = (id: string, data: ImageData) => {
+    const preview = createPreview(data);
+    const alphaPreview = createAlphaPreview(data);
+
+    setLayers((prev) =>
+      prev.map((l) =>
+        l.id === id
+          ? {
+              ...l,
+              originalImageData: data,
+              editedImageData: data,
+              preview,
+              alphaChannelPreview: alphaPreview,
+            }
+          : l,
+      ),
     );
   };
 
@@ -523,10 +595,11 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
         deleteAlphaChannel,
         setColorDepth,
         setIsGrayscale,
-        updateLayer
+        updateLayer,
+        setOriginalImageData,
       }}
     >
       {children}
     </LayersContext.Provider>
   );
-} 
+}

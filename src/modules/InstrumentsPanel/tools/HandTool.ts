@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useImage } from '../../../contexts/ImageContext';
+import { useState } from "react";
+import { useImage } from "../../../contexts/ImageContext";
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -11,14 +11,19 @@ export interface HandToolState {
 }
 
 export function useHandTool() {
-  const { setOffsetX, setOffsetY, scaledImageData: scalledImageData, canvasRef } = useImage();
+  const {
+    setOffsetX,
+    setOffsetY,
+    scaledImageData: scalledImageData,
+    canvasRef,
+  } = useImage();
   const [state, setState] = useState<HandToolState>({
     isDragging: false,
     lastPos: null,
   });
 
   // Скорость перемещения стрелками (в пикселях)
-  const ARROW_MOVE_SPEED = 10;
+  // const ARROW_MOVE_SPEED = 10;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setState({
@@ -28,7 +33,13 @@ export function useHandTool() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!state.isDragging || !state.lastPos || !canvasRef?.current || !scalledImageData) return;
+    if (
+      !state.isDragging ||
+      !state.lastPos ||
+      !canvasRef?.current ||
+      !scalledImageData
+    )
+      return;
 
     const dx = e.clientX - state.lastPos.x;
     const dy = e.clientY - state.lastPos.y;
@@ -70,29 +81,29 @@ export function useHandTool() {
     });
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!scalledImageData) return;
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          updateOffset(-ARROW_MOVE_SPEED, 0);
-          break;
-        case 'ArrowRight':
-          updateOffset(ARROW_MOVE_SPEED, 0);
-          break;
-        case 'ArrowUp':
-          updateOffset(0, -ARROW_MOVE_SPEED);
-          break;
-        case 'ArrowDown':
-          updateOffset(0, ARROW_MOVE_SPEED);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scalledImageData, canvasRef, ARROW_MOVE_SPEED, updateOffset]);
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (!scalledImageData) return;
+  //
+  //     switch (e.key) {
+  //       case 'ArrowLeft':
+  //         updateOffset(-ARROW_MOVE_SPEED, 0);
+  //         break;
+  //       case 'ArrowRight':
+  //         updateOffset(ARROW_MOVE_SPEED, 0);
+  //         break;
+  //       case 'ArrowUp':
+  //         updateOffset(0, -ARROW_MOVE_SPEED);
+  //         break;
+  //       case 'ArrowDown':
+  //         updateOffset(0, ARROW_MOVE_SPEED);
+  //         break;
+  //     }
+  //   };
+  //
+  //   window.addEventListener('keydown', handleKeyDown);
+  //   return () => window.removeEventListener('keydown', handleKeyDown);
+  // }, [scalledImageData, canvasRef, ARROW_MOVE_SPEED, updateOffset]);
 
   return {
     handleMouseDown,
@@ -100,4 +111,4 @@ export function useHandTool() {
     handleMouseUp,
     isDragging: state.isDragging,
   };
-} 
+}
