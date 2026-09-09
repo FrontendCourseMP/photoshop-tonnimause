@@ -1,0 +1,36 @@
+.layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.leftSider {
+  background: #fff;
+  border-right: 1px solid #d9d9d9;
+}
+
+.rightSider {
+  background: #fff;
+  border-left: 1px solid #d9d9d9;
+  overflow: hidden;
+}
+
+.header {
+  padding: 0 16px;
+  background: #fff;
+  border-bottom: 1px solid #d9d9d9;
+  height: 48px;
+  line-height: 48px;
+
+  h1 {
+    margin: 0;
+    color: #1890ff;
+  }
+}
+
+.content {
+  position: relative;
+  height: calc(100vh - 48px - 24px); // вычитаем высоту header и statusbar
+  background: #f0f2f5;
+  padding: 16px;
+  overflow: hidden;
+} 

@@ -1,62 +1,60 @@
-import { useRef, useState } from "react";
-import { Button, Layout, Space, Upload, message } from "antd";
-import { UploadOutlined, ExpandOutlined } from "@ant-design/icons";
+import { Button, Layout, Upload, message } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import type { RcFile } from "antd/es/upload/interface";
-import { Canvas } from "./modules/Canvas/Canvas";
-import { StatusBar } from "./components/StatusBar/StatusBar";
-import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
-import { ImageProvider, useImage } from "./contexts/ImageContext";
+import { ImageProvider } from "./contexts/ImageContext";
+import { LayersProvider, useLayers } from "./contexts/LayersContext";
 import { ToolProvider, useTools } from "./contexts/ToolContext";
 import { ColorPickerProvider } from "./contexts/ColorPickerContext";
+import { Canvas } from "./modules/Canvas/Canvas";
+import { LayerPanel } from "./modules/LayerPanel/LayerPanel";
 import { InstrumentsPanel } from "./modules/InstrumentsPanel/InstrumentsPanel";
 import { ColorPickerWindow } from "./modules/ColorPickerWindow/ColorPickerWindow";
+import { StatusBar } from "./components/StatusBar/StatusBar";
 import { detectImageFormat } from "./utils/ImageTypeGetter";
 import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
 import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
+import styles from "./App.module.scss";
 
-const { Header, Content, Sider } = Layout;
+const { Header, Sider, Content } = Layout;
 
 function AppContent() {
-  const { imageData, setImageData } = useImage();
+  const { addLayer, layers, activeLayerId, updateLayer } = useLayers();
   const { activeTool } = useTools();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isInterpolationModalOpen, setIsInterpolationModalOpen] = useState(false);
 
   const handleFileChange = async (file: RcFile) => {
-    console.log("Starting image load process...");
-    console.log("File:", file.name, file.type);
-
     try {
-      // Определяем формат изображения
       const format = await detectImageFormat(file);
       console.log("Detected format:", format);
 
-      // Загружаем изображение в зависимости от формата
-      const newImageData =
+      const imageData =
         format === "graybit-7"
           ? await loadGB7Image(file)
           : await loadStandardImage(file);
 
-      console.log(
-        "Image loaded:",
-        newImageData
-          ? `${newImageData.width}x${newImageData.height}`
-          : "load failed"
-      );
-
-      if (!newImageData) {
+      if (!imageData) {
         throw new Error("Failed to load image");
       }
 
-      // Получаем глубину цвета
       const colorDepth = await getColorDepthOfImage(file, format);
       console.log("Color depth:", colorDepth);
 
-      // Обновляем состояние в контексте
-      setImageData(newImageData, colorDepth);
+      // Если нет активного слоя или слоев вообще нет, создаем новый
+      if (!activeLayerId || layers.length === 0) {
+        addLayer(imageData);
+      } else {
+        // Иначе обновляем существующий активный слой
+        updateLayer(activeLayerId, {
+          originalImageData: imageData,
+          editedImageData: imageData,
+          name: file.name,
+          colorDepth,
+          hasAlphaChannel: true,
+          alphaChannelVisible: true
+        });
+      }
 
       message.success("Изображение успешно загружено");
-      return false; // Prevent default upload behavior
+      return false;
     } catch (error) {
       console.error("Error loading image:", error);
       message.error("Ошибка при загрузке изображения");
@@ -65,9 +63,9 @@ function AppContent() {
   };
 
   return (
-    <Layout style={{ height: "100vh", overflow: "hidden" }}>
-      <Header style={{ padding: "0 16px", background: "#fff" }}>
-        <Space>
+    <Layout className={styles.layout}>
+      <Layout>
+        <Header className={styles.header}>
           <Upload
             accept=".png,.jpg,.jpeg,.gb7"
             showUploadList={false}
@@ -75,54 +73,35 @@ function AppContent() {
           >
             <Button icon={<UploadOutlined />}>Загрузить изображение</Button>
           </Upload>
-          <Button 
-            icon={<ExpandOutlined />}
-            onClick={() => setIsInterpolationModalOpen(true)}
-            disabled={!imageData}
-          >
-            Изменить размер
-          </Button>
-        </Space>
-      </Header>
-
-      <Layout style={{ height: "calc(100vh - 64px)" }}>
-        <Sider width={56} theme="light" style={{ borderRight: '1px solid #d9d9d9' }}>
-          <InstrumentsPanel />
-        </Sider>
+        </Header>
         <Layout>
-          <Content style={{ 
-            display: "flex", 
-            flexDirection: "column",
-            height: "100%",
-            overflow: "hidden"
-          }}>
-            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
-              <Canvas ref={canvasRef} />
-              {activeTool === 'pipette' && <ColorPickerWindow />}
-            </div>
+          <Sider width={56} className={styles.leftSider}>
+            <InstrumentsPanel />
+          </Sider>
+          <Content className={styles.content}>
+            <Canvas />
+            {activeTool === 'pipette' && <ColorPickerWindow />}
           </Content>
-          <StatusBar />
+          <Sider width={280} className={styles.rightSider}>
+            <LayerPanel />
+          </Sider>
         </Layout>
+        <StatusBar />
       </Layout>
-
-      <InterpolationModal
-        isOpen={isInterpolationModalOpen}
-        onClose={() => setIsInterpolationModalOpen(false)}
-      />
     </Layout>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <ToolProvider>
       <ImageProvider>
-        <ColorPickerProvider>
-          <AppContent />
-        </ColorPickerProvider>
+        <LayersProvider>
+          <ColorPickerProvider>
+            <AppContent />
+          </ColorPickerProvider>
+        </LayersProvider>
       </ImageProvider>
     </ToolProvider>
   );
 }
-
-export default App;

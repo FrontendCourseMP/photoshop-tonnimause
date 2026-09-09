@@ -39,6 +39,7 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
     maintainAspectRatio: true,
     interpolationMethod: "bilinear",
   });
+  void imageData;
 
   const originalPixels = originalWidth * originalHeight;
 

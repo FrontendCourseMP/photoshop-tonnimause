@@ -33,7 +33,7 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
   }>(null);
 
   const handTool = useHandTool();
-
+  void getCursor;
   function getCursor(activeToolID: string | null) {
     switch (activeToolID) {
       case 'hand':
@@ -41,8 +41,8 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
       case 'pipette':
         return 'crosshair';
       default:
-        return 'default';
-    }
+      return 'default';
+    } 
   }
 
   const startDragging = (e: React.MouseEvent, axis: 'x' | 'y') => {

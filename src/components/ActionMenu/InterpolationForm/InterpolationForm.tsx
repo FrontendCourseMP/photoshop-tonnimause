@@ -28,11 +28,11 @@ const interpolationMethods = {
     description: "Сглаженный результат, подходит для фотографий. Может немного размывать детали.",
   },
 };
-
+ 
 export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
   const { imageData, width: originalWidth, height: originalHeight } = useImage();
   const [form] = Form.useForm<InterpolationFormValues>();
-
+  void imageData;
   const originalPixels = originalWidth * originalHeight;
   const currentValues = form.getFieldsValue();
   const newPixels = currentValues.width * currentValues.height;
