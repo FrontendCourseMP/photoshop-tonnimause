@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: photoshop-tonnimause
+    runtime: static
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 24.11.0
