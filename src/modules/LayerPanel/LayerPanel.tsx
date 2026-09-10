@@ -20,17 +20,21 @@ export function LayerPanel() {
   return (
     <div className={styles.layerPanel}>
       <div className={styles.header}>
-        <h3>Слои</h3>
-        <Tooltip title={layers.length >= 2 ? "Максимум 2 слоя" : "Добавить слой"}>
+        <h3 className={styles.title}>Слои</h3>
+        <Tooltip
+          title={layers.length >= 2 ? "Максимум 2 слоя" : "Добавить слой"}
+        >
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={handleAddLayer}
             disabled={layers.length >= 2}
-          />
+          >
+            Добавить слой
+          </Button>
         </Tooltip>
       </div>
-      
+
       <div className={styles.layerList}>
         {displayLayers.map((layer, index) => (
           <LayerInfo
@@ -42,4 +46,4 @@ export function LayerPanel() {
       </div>
     </div>
   );
-} 
+}

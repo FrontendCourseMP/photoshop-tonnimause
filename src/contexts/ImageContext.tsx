@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { resizeImageByMethod } from "../utils/resizeImage";
+import { resizeImageByMethod } from "../utils/resize";
 
 interface ImageContextProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null> | null;
@@ -36,9 +36,12 @@ export function useImage() {
 const padding = 50;
 
 export function ImageProvider({ children }: { children: React.ReactNode }) {
-  const [canvasRef, setCanvasRef] = useState<React.RefObject<HTMLCanvasElement | null> | null>(null);
+  const [canvasRef, setCanvasRef] =
+    useState<React.RefObject<HTMLCanvasElement | null> | null>(null);
   const [imageData, setImageDataState] = useState<ImageData | null>(null);
-  const [scaledImageData, setScaledImageData] = useState<ImageData | null>(null);
+  const [scaledImageData, setScaledImageData] = useState<ImageData | null>(
+    null,
+  );
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const [width, setWidth] = useState(0);
@@ -98,20 +101,17 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
     const newHeight = Math.round(imageData.height * scaleValue);
 
     // Создаем масштабированное изображение методом ближайшего соседа
-    resizeImageByMethod(
-      imageData,
-      newWidth,
-      newHeight,
-      "nearest"
-    ).then((scaledImage) => {
-      if (scaledImage) {
-        setScaledImageData(scaledImage);
-        
-        // Центрируем изображение
-        setOffsetX((canvas.width - newWidth) / 2);
-        setOffsetY((canvas.height - newHeight) / 2);
-      }
-    });
+    resizeImageByMethod(imageData, newWidth, newHeight, "nearest").then(
+      (scaledImage) => {
+        if (scaledImage) {
+          setScaledImageData(scaledImage);
+
+          // Центрируем изображение
+          setOffsetX((canvas.width - newWidth) / 2);
+          setOffsetY((canvas.height - newHeight) / 2);
+        }
+      },
+    );
   }, [imageData, scaleValue]);
 
   // Эффект для отрисовки масштабированного изображения
@@ -152,4 +152,4 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
       {children}
     </ImageContext.Provider>
   );
-} 
+}

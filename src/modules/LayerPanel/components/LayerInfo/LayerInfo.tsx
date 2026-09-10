@@ -35,7 +35,8 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
     toggleLayerVisibility,
     setLayerOpacity,
     setLayerBlendMode,
-    toggleAlphaVisibility
+    toggleAlphaVisibility,
+    deleteAlphaChannel,
   } = useLayers();
 
   const isActive = layer.id === activeLayerId;
@@ -54,6 +55,11 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
   const handleAlphaVisibilityToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleAlphaVisibility(layer.id);
+  };
+
+  const handleRemoveAlpha = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteAlphaChannel(layer.id);
   };
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -88,6 +94,7 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
       className={`${styles.layerInfo} ${isActive ? styles.active : ""}`}
       onClick={handleClick}
     >
+      <div className={styles.name}>{layer.name}</div>
       <div className={styles.topLine}>
         <div className={styles.previews}>
           <div className={styles.preview}>
@@ -105,14 +112,31 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
         </div>
         <div className={styles.buttons}>
           {layer.hasAlphaChannel && (
-            <Tooltip title="Видимость альфа-канала">
-              <Button
-                type="text"
-                size="small"
-                icon={layer.alphaChannelVisible ? <EyeFilledOutlined /> : <EyeInvisibleFilled />}
-                onClick={handleAlphaVisibilityToggle}
-              />
-            </Tooltip>
+            <>
+              <Tooltip title="Видимость альфа-канала">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={
+                    layer.alphaChannelVisible ? (
+                      <EyeFilledOutlined />
+                    ) : (
+                      <EyeInvisibleFilled />
+                    )
+                  }
+                  onClick={handleAlphaVisibilityToggle}
+                />
+              </Tooltip>
+              <Tooltip title="Удалить альфа-канал">
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={handleRemoveAlpha}
+                />
+              </Tooltip>
+            </>
           )}
           <Tooltip title={layer.visible ? "Скрыть слой" : "Показать слой"}>
             <Button
@@ -178,4 +202,4 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
       </div>
     </div>
   );
-} 
+}

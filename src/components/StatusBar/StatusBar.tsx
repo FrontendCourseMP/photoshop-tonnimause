@@ -1,6 +1,8 @@
 import { Select } from "antd";
 import { useImage } from "../../contexts/ImageContext";
 import styles from "./StatusBar.module.scss";
+import { useLayers, type Layer } from "../../contexts/LayersContext";
+import { useEffect, useState } from "react";
 
 const scaleOptions = [
   { value: 0.12, label: "12%" },
@@ -14,18 +16,36 @@ const scaleOptions = [
 ];
 
 export function StatusBar() {
-  const { imageData, width, height, colorDepth, scaleValue, setScaleValue } = useImage();
+  const { imageData, scaleValue, setScaleValue } = useImage();
+  const { activeLayerId, layers } = useLayers();
+  const [activeLayer, setActiveLayer] = useState<Layer | null>(null);
+
+  useEffect(() => {
+    const layer = layers.find((layer) => layer.id === activeLayerId);
+    if (!layer) {
+      setActiveLayer(null);
+      return;
+    } else setActiveLayer(layer);
+  }, [activeLayerId, layers]);
 
   return (
     <div className={styles.statusBar}>
       <div className={styles.statusItem}>
         <span className={styles.label}>Размер:</span>
-        <span className={styles.value}>{imageData ? `${width} × ${height} пикселей` : "—"}</span>
+        <span className={styles.value}>
+          {activeLayer
+            ? `${activeLayer.originalImageData?.width} × ${activeLayer.originalImageData?.height} пикселей`
+            : "—"}
+        </span>
       </div>
 
       <div className={styles.statusItem}>
         <span className={styles.label}>Глубина цвета:</span>
-        <span className={styles.value}>{imageData && colorDepth ? `${colorDepth} бит` : "—"}</span>
+        <span className={styles.value}>
+          {activeLayer && activeLayer.colorDepth
+            ? `${activeLayer.colorDepth} бит`
+            : "—"}
+        </span>
       </div>
 
       <div className={styles.statusItem}>
@@ -36,9 +56,9 @@ export function StatusBar() {
           options={scaleOptions}
           className={styles.scaleSelect}
           disabled={!imageData}
-          dropdownMatchSelectWidth={false}
+          // dropdownMatchSelectWidth={false}
         />
       </div>
     </div>
   );
-} 
+}

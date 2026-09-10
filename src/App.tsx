@@ -2,7 +2,6 @@ import React from "react";
 import { Button, Layout, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import type { RcFile } from "antd/es/upload/interface";
-import { useHotkeys } from "react-hotkeys-hook";
 import { ImageProvider } from "./contexts/ImageContext";
 import { LayersProvider, useLayers } from "./contexts/LayersContext";
 import { ToolProvider, useTools } from "./contexts/ToolContext";
@@ -18,6 +17,16 @@ import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
 import styles from "./App.module.scss";
 import { CorrectionModal } from "./modules/Curves/CorrectionModal/CorrectionModal";
 import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
+import { FilterKernelModal } from "./components/FilterModal/FilterModal";
+import { SaveImageModal } from "./components/SaveModal/SaveModal";
+import { Suspense } from "react";
+
+const LazyFillImageColorModal = React.lazy(async () => {
+  const module = await import(
+    "./components/FillImageWithColorModal/FillImageWithColorModal"
+  );
+  return { default: module.FillImageColorModal };
+});
 
 const { Header, Sider, Content } = Layout;
 
@@ -26,11 +35,9 @@ function AppContent() {
   const { activeTool } = useTools();
   const [isCorrectionModalOpen, setCorrectionModalOpen] = React.useState(false);
   const [isResizeModalOpen, setResizeModalOpen] = React.useState(false);
-
-  // Горячая клавиша для открытия модального окна интерполяции
-  useHotkeys('r', () => {
-    setResizeModalOpen(true);
-  });
+  const [isFilterModalOpen, setFilterModalOpen] = React.useState(false);
+  const [isFillColorModalOpen, setFillColorModalOpen] = React.useState(false);
+  const [isSaveModalOpen, setSaveModalOpen] = React.useState(false);
 
   const handleFileChange = async (file: RcFile) => {
     try {
@@ -51,7 +58,7 @@ function AppContent() {
 
       // Если нет активного слоя или слоев вообще нет, создаем новый
       if (!activeLayerId || layers.length === 0) {
-        addLayer(imageData);
+        addLayer(imageData, colorDepth);
       } else {
         // Иначе обновляем существующий активный слой
         updateLayer(activeLayerId, {
@@ -85,6 +92,27 @@ function AppContent() {
         onClose={() => setResizeModalOpen(false)}
       />
 
+      <FilterKernelModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+      />
+
+      <Suspense
+        fallback={
+          <div style={{ color: "black", fontSize: "2rem" }}>Загрузка…</div>
+        }
+      >
+        <LazyFillImageColorModal
+          isOpen={isFillColorModalOpen}
+          onClose={() => setFillColorModalOpen(false)}
+        />
+      </Suspense>
+
+      <SaveImageModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setSaveModalOpen(false)}
+      />
+
       <Layout>
         <Header className={styles.header}>
           <Upload
@@ -95,9 +123,14 @@ function AppContent() {
             <Button icon={<UploadOutlined />}>Загрузить изображение</Button>
           </Upload>
           <Button onClick={() => setResizeModalOpen(true)}>Интерполяция</Button>
+          <Button onClick={() => setFillColorModalOpen(true)}>
+            Залить цветом
+          </Button>
           <Button onClick={() => setCorrectionModalOpen(true)}>
             Градационная коррекция
           </Button>
+          <Button onClick={() => setFilterModalOpen(true)}>Фильтр ядром</Button>
+          <Button onClick={() => setSaveModalOpen(true)}>Сохранить</Button>
         </Header>
         <Layout>
           <Sider width={56} className={styles.leftSider}>

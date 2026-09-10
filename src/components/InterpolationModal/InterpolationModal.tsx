@@ -1,15 +1,19 @@
+import React from "react";
 import { Modal, message } from "antd";
 import { useImage } from "../../contexts/ImageContext";
 import { InterpolationForm } from "../InterpolationForm/InterpolationForm";
 import type { InterpolationFormValues } from "../InterpolationForm/InterpolationForm";
-import { resizeImageByMethod } from "../../utils/resizeImage";
+import { resizeImageByMethod } from "../../utils/resize";
 
 interface InterpolationModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function InterpolationModal({ isOpen, onClose }: InterpolationModalProps) {
+export function InterpolationModal({
+  isOpen,
+  onClose,
+}: InterpolationModalProps) {
   const { imageData, width, height, setImageData } = useImage();
 
   const handleSubmit = async (values: InterpolationFormValues) => {
@@ -31,8 +35,10 @@ export function InterpolationModal({ isOpen, onClose }: InterpolationModalProps)
         imageData,
         newWidth,
         newHeight,
-        values.interpolationMethod
+        values.interpolationMethod,
       );
+
+      if (!resizedImageData) return;
 
       // Обновляем изображение в контексте
       setImageData(resizedImageData);
@@ -56,4 +62,4 @@ export function InterpolationModal({ isOpen, onClose }: InterpolationModalProps)
       <InterpolationForm onSubmit={handleSubmit} />
     </Modal>
   );
-} 
+}

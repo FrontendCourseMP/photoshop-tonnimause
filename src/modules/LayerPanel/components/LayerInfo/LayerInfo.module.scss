@@ -1,3 +1,9 @@
+.name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+}
+
 .layerInfo {
   display: flex;
   flex-direction: column;
@@ -95,7 +101,7 @@
 }
 
 .slider {
-  width: 100%;
+  width: calc(100% - 15px);
 }
 
 .select {
@@ -112,6 +118,7 @@
   }
 
   :global(.ant-select-arrow) {
+    top: 13px;
     right: 8px;
   }
 }
@@ -125,4 +132,4 @@
     padding: 2px 4px;
     height: auto;
   }
-} 
+}

@@ -15,7 +15,6 @@ export async function resizeImageByMethod(
   }
 
   if (src.width === newWidth && src.height === newHeight) {
-    alert("Размер изображения не изменился");
     return src;
   }
 

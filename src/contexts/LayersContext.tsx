@@ -27,7 +27,7 @@ interface LayersContextProps {
   layers: Layer[];
   activeLayerId: string | null;
   setActiveLayerId: (id: string | null) => void;
-  addLayer: (imageData?: ImageData) => void;
+  addLayer: (imageData?: ImageData, colorDepth?: number) => void;
   removeLayer: (id: string) => void;
   moveLayer: (fromIndex: number, toIndex: number) => void;
   toggleLayerVisibility: (id: string) => void;
@@ -40,6 +40,7 @@ interface LayersContextProps {
   setIsGrayscale: (id: string, isGrayscale: boolean) => void;
   updateLayer: (id: string, updates: Partial<Layer>) => void;
   setOriginalImageData: (id: string, data: ImageData) => void;
+  fillLayerWithColor: (id: string, color: string) => void;
 }
 
 const LayersContext = createContext<LayersContextProps | null>(null);
@@ -408,7 +409,7 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const addLayer = (imageData?: ImageData) => {
+  const addLayer = (imageData?: ImageData, colorDepth?: number) => {
     if (layers.length >= 2) return; // Максимум 2 слоя
 
     const id = Date.now().toString();
@@ -419,6 +420,7 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
       preview: imageData ? createPreview(imageData) : "",
       alphaChannelPreview: imageData ? createAlphaPreview(imageData) : "",
       hasAlphaChannel: !!imageData,
+      colorDepth: colorDepth || 0,
       name: `Слой ${layers.length + 1}`,
     };
 
@@ -578,6 +580,34 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  function fillLayerWithColor(id: string, color: string) {
+    setLayers((prevLayers) => {
+      return prevLayers.map((layer) => {
+        if (layer.id !== id || !layer.originalImageData) return layer;
+
+        const { width, height, data } = layer.originalImageData;
+        const newImageData = new ImageData(width, height);
+        const rgba = hexToRgba(color);
+
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          newImageData.data[i] = rgba[0];
+          newImageData.data[i + 1] = rgba[1];
+          newImageData.data[i + 2] = rgba[2];
+          newImageData.data[i + 3] = alpha;
+        }
+
+        return {
+          ...layer,
+          originalImageData: newImageData,
+          editedImageData: newImageData,
+          preview: createPreview(newImageData),
+          alphaChannelPreview: createAlphaPreview(newImageData),
+        };
+      });
+    });
+  }
+
   return (
     <LayersContext.Provider
       value={{
@@ -597,9 +627,26 @@ export function LayersProvider({ children }: { children: React.ReactNode }) {
         setIsGrayscale,
         updateLayer,
         setOriginalImageData,
+        fillLayerWithColor,
       }}
     >
       {children}
     </LayersContext.Provider>
   );
+}
+
+function hexToRgba(hex: string): [number, number, number, number] {
+  let cleanHex = hex.replace("#", "");
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex
+      .split("")
+      .map((ch) => ch + ch)
+      .join("");
+  }
+
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+
+  return [r, g, b, 255];
 }
