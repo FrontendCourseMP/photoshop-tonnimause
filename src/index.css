@@ -72,3 +72,28 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Позиционирование уведомлений Ant Design справа сверху над панелью слоев */
+.ant-message {
+  position: fixed !important;
+  top: 64px !important;
+  left: auto !important;
+  right: 16px !important;
+  transform: translateX(0) !important;
+  z-index: 1010 !important;
+}
+
+.ant-message-top {
+  top: 64px !important;
+  left: auto !important;
+  right: 16px !important;
+  transform: translateX(0) !important;
+}
+
+.ant-message-notice {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}

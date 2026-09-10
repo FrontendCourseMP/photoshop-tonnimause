@@ -32,12 +32,31 @@ const { Header, Sider, Content } = Layout;
 
 function AppContent() {
   const { addLayer, layers, activeLayerId, updateLayer } = useLayers();
-  const { activeTool } = useTools();
+  const { activeTool, setActiveTool } = useTools();
   const [isCorrectionModalOpen, setCorrectionModalOpen] = React.useState(false);
   const [isResizeModalOpen, setResizeModalOpen] = React.useState(false);
   const [isFilterModalOpen, setFilterModalOpen] = React.useState(false);
   const [isFillColorModalOpen, setFillColorModalOpen] = React.useState(false);
   const [isSaveModalOpen, setSaveModalOpen] = React.useState(false);
+
+  // Настраиваем позиционирование уведомлений справа сверху над панелью слоев
+  React.useEffect(() => {
+    message.config({
+      top: 64,
+      duration: 3,
+      maxCount: 3,
+      rtl: false,
+      getContainer: () => document.body,
+    });
+  }, []);
+
+  // Открываем модальное окно интерполяции при выборе инструмента resize
+  React.useEffect(() => {
+    if (activeTool === 'resize') {
+      setResizeModalOpen(true);
+      setActiveTool(null); // Сбрасываем активный инструмент после открытия модального окна
+    }
+  }, [activeTool, setActiveTool]);
 
   const handleFileChange = async (file: RcFile) => {
     try {
@@ -89,7 +108,10 @@ function AppContent() {
 
       <InterpolationModal
         isOpen={isResizeModalOpen}
-        onClose={() => setResizeModalOpen(false)}
+        onClose={() => {
+          setResizeModalOpen(false);
+          setActiveTool(null);
+        }}
       />
 
       <FilterKernelModal

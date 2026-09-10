@@ -1,4 +1,4 @@
-import { InputNumber, Row, Col, Typography, Divider, Card } from "antd";
+import { InputNumber, Row, Col, Typography, Card, Space } from "antd";
 
 type Point = { input: number; output: number };
 
@@ -69,124 +69,128 @@ export const CurvesEditor: React.FC<CurvesEditorProps> = ({
 
   return (
     <Card style={{}}>
-      <svg
-        width={SVG_SIZE}
-        height={SVG_SIZE}
-        style={{ border: "1px solid #ccc" }}
-      >
-        <line
-          x1={0}
-          y1={SVG_SIZE}
-          x2={SVG_SIZE}
-          y2={0}
-          stroke="blue"
-          strokeWidth={1}
-        />
-
-        <polyline
-          fill="none"
-          stroke={getColor()}
-          strokeWidth="1"
-          points={polylinePoints}
-        />
-
-        <line
-          x1={p1.input}
-          y1={SVG_SIZE - p1.output}
-          x2={p2.input}
-          y2={SVG_SIZE - p2.output}
-          stroke="black"
-          strokeWidth={1}
-        />
-
-        <line
-          x1={0}
-          x2={p1.input}
-          y1={SVG_SIZE - p1.output}
-          y2={SVG_SIZE - p1.output}
-          stroke="black"
-        />
-        <line
-          x1={p2.input}
-          x2={SVG_SIZE}
-          y1={SVG_SIZE - p2.output}
-          y2={SVG_SIZE - p2.output}
-          stroke="black"
-        />
-
-        <circle
-          cx={p1.input}
-          cy={SVG_SIZE - p1.output}
-          r={4}
-          fill="white"
-          stroke="black"
-        />
-        <circle
-          cx={p2.input}
-          cy={SVG_SIZE - p2.output}
-          r={4}
-          fill="black"
-          stroke="black"
-        />
-      </svg>
-
-      <Divider />
-
       <Row gutter={16}>
-        <Col span={12}>
-          <Typography.Text strong>Точка 1</Typography.Text>
-          <Row gutter={[4, 4]}>
-            <Col span={12}>
-              <Typography.Text>In</Typography.Text>
-              <InputNumber
-                min={0}
-                max={255}
-                value={p1.input}
-                onChange={(val) => val !== null && updatePoint(0, "input", val)}
-                style={{ width: "100%" }}
-              />
-            </Col>
-            <Col span={12}>
-              <Typography.Text>Out</Typography.Text>
-              <InputNumber
-                min={0}
-                max={255}
-                value={p1.output}
-                onChange={(val) =>
-                  val !== null && updatePoint(0, "output", val)
-                }
-                style={{ width: "100%" }}
-              />
-            </Col>
-          </Row>
+        <Col>
+          <svg
+            width={SVG_SIZE}
+            height={SVG_SIZE}
+            style={{ border: "1px solid #ccc" }}
+          >
+            <line
+              x1={0}
+              y1={SVG_SIZE}
+              x2={SVG_SIZE}
+              y2={0}
+              stroke="blue"
+              strokeWidth={1}
+            />
+
+            <polyline
+              fill="none"
+              stroke={getColor()}
+              strokeWidth="1"
+              points={polylinePoints}
+            />
+
+            <line
+              x1={p1.input}
+              y1={SVG_SIZE - p1.output}
+              x2={p2.input}
+              y2={SVG_SIZE - p2.output}
+              stroke="black"
+              strokeWidth={1}
+            />
+
+            <line
+              x1={0}
+              x2={p1.input}
+              y1={SVG_SIZE - p1.output}
+              y2={SVG_SIZE - p1.output}
+              stroke="black"
+            />
+            <line
+              x1={p2.input}
+              x2={SVG_SIZE}
+              y1={SVG_SIZE - p2.output}
+              y2={SVG_SIZE - p2.output}
+              stroke="black"
+            />
+
+            <circle
+              cx={p1.input}
+              cy={SVG_SIZE - p1.output}
+              r={4}
+              fill="white"
+              stroke="black"
+            />
+            <circle
+              cx={p2.input}
+              cy={SVG_SIZE - p2.output}
+              r={4}
+              fill="black"
+              stroke="black"
+            />
+          </svg>
         </Col>
 
-        <Col span={12}>
-          <Typography.Text strong>Точка 2</Typography.Text>
-          <Row gutter={[4, 4]}>
-            <Col span={12}>
-              <Typography.Text>In</Typography.Text>
-              <InputNumber
-                min={0}
-                max={255}
-                value={p2.input}
-                onChange={(val) => val !== null && updatePoint(1, "input", val)}
-                style={{ width: "100%" }}
-              />
-            </Col>
-            <Col span={12}>
-              <Typography.Text>Out</Typography.Text>
-              <InputNumber
-                min={0}
-                max={255}
-                value={p2.output}
-                onChange={(val) =>
-                  val !== null && updatePoint(1, "output", val)
-                }
-                style={{ width: "100%" }}
-              />
-            </Col>
-          </Row>
+        <Col>
+          <Space direction="vertical" size="middle">
+            <div>
+              <Typography.Text strong>Точка 1</Typography.Text>
+              <Row gutter={[4, 4]}>
+                <Col span={12}>
+                  <Typography.Text>In</Typography.Text>
+                  <InputNumber
+                    min={0}
+                    max={255}
+                    value={p1.input}
+                    onChange={(val) => val !== null && updatePoint(0, "input", val)}
+                    style={{ width: "100%" }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Typography.Text>Out</Typography.Text>
+                  <InputNumber
+                    min={0}
+                    max={255}
+                    value={p1.output}
+                    onChange={(val) =>
+                      val !== null && updatePoint(0, "output", val)
+                    }
+                    style={{ width: "100%" }}
+                  />
+                </Col>
+              </Row>
+            </div>
+
+            <div>
+              <Typography.Text strong>Точка 2</Typography.Text>
+              <Row gutter={[4, 4]}>
+                <Col span={12}>
+                  <Typography.Text>In</Typography.Text>
+                  <InputNumber
+                    min={0}
+                    max={255}
+                    value={p2.input}
+                    onChange={(val) => val !== null && updatePoint(1, "input", val)}
+                    style={{ width: "100%" }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Typography.Text>Out</Typography.Text>
+                  <InputNumber
+                    min={0}
+                    max={255}
+                    value={p2.output}
+                    onChange={(val) =>
+                      val !== null && updatePoint(1, "output", val)
+                    }
+                    style={{ width: "100%" }}
+                  />
+                </Col>
+              </Row>
+            </div>
+          </Space>
         </Col>
       </Row>
     </Card>

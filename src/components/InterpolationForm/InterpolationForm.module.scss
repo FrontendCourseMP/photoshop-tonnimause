@@ -13,8 +13,17 @@
   width: 100%;
   display: flex;
   gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
 
   :global(.ant-form-item) {
     flex: 1;
+    margin-bottom: 0;
+  }
+  
+  :global(.ant-form-item-explain-error) {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
   }
 } 

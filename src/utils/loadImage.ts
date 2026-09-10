@@ -1,4 +1,3 @@
-import { detectImageFormat } from "./ImageTypeGetter";
 import { getGB7ImageData, parseGB7Pixels } from "./ParseGB7";
 
 // Загрузка стандартного изображения (PNG, JPEG)

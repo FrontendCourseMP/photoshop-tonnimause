@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Typography, Space, Divider } from "antd";
+import { Modal, Typography, Space, Divider } from "antd";
 import { ChromePicker } from "react-color";
 import { useLayers, type Layer } from "../../contexts/LayersContext";
 

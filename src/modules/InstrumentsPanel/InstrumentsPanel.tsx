@@ -7,12 +7,10 @@ import styles from "./InstrumentsPanel.module.scss";
 export function InstrumentsPanel() {
   const { setActiveTool } = useTools();
 
-  // Регистрируем горячие клавиши
-  instruments.forEach(({ id, hotkey }) => {
-    useHotkeys(hotkey, () => {
-      setActiveTool(id);
-    });
-  });
+  // Регистрируем горячие клавиши для каждого инструмента
+  useHotkeys('h', () => setActiveTool('hand'));
+  useHotkeys('i', () => setActiveTool('pipette'));
+  useHotkeys('r', () => setActiveTool('resize'));
 
   return (
     <div className={styles.panel}>

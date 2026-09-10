@@ -19,6 +19,8 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
     offsetX,
     offsetY,
     scaledImageData: scalledImageData,
+    imageData,
+    scaleValue,
   } = useImage();
   const { activeTool } = useTools();
   const { setFirstColor, setSecondColor } = useColorPicker();
@@ -107,7 +109,7 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (activeTool === 'hand') {
       handTool.handleMouseDown(e);
-    } else if (activeTool === 'pipette' && scalledImageData) {
+    } else if (activeTool === 'pipette' && scalledImageData && imageData && scaleValue > 0) {
       const canvas = actualCanvasRef.current;
       if (!canvas) return;
 
@@ -118,12 +120,21 @@ export const Canvas = forwardRef<HTMLCanvasElement>((_, ref) => {
       const imageX = canvasX - offsetX;
       const imageY = canvasY - offsetY;
 
-      const pixelX = Math.floor(imageX);
-      const pixelY = Math.floor(imageY);
+      // Координаты в масштабированном изображении
+      const scaledPixelX = Math.floor(imageX);
+      const scaledPixelY = Math.floor(imageY);
+
+      // Преобразуем координаты из масштабированного изображения в оригинальные
+      const originalPixelX = Math.round(scaledPixelX / scaleValue);
+      const originalPixelY = Math.round(scaledPixelY / scaleValue);
+
+      // Ограничиваем координаты границами оригинального изображения
+      const clampedOriginalX = Math.max(0, Math.min(originalPixelX, imageData.width - 1));
+      const clampedOriginalY = Math.max(0, Math.min(originalPixelY, imageData.height - 1));
 
       const pixel = getPixelColor(e.clientX, e.clientY);
       if (pixel) {
-        const coords = { x: pixelX, y: pixelY };
+        const coords = { x: clampedOriginalX, y: clampedOriginalY };
         if (e.altKey || e.ctrlKey || e.shiftKey) {
           setSecondColor(pixel, coords);
         } else {

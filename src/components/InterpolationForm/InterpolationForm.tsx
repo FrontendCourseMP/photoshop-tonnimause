@@ -61,7 +61,7 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
     if (!newWidth) return;
 
     const values = form.getFieldsValue();
-    let newValues = { ...values, width: newWidth };
+    const newValues = { ...values, width: newWidth };
 
     if (values.maintainAspectRatio) {
       if (values.unit === "percent") {
@@ -82,7 +82,7 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
     if (!newHeight) return;
 
     const values = form.getFieldsValue();
-    let newValues = { ...values, height: newHeight };
+    const newValues = { ...values, height: newHeight };
 
     if (values.maintainAspectRatio) {
       if (values.unit === "percent") {
@@ -140,7 +140,12 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
     setFormValues(initialValues);
   }, [form, originalWidth, originalHeight]);
 
-  const validateDimension = (_: any, value: number) => {
+  const validateDimension = (_: any, value: number | null | undefined) => {
+    // Если значение пустое (null или undefined), не валидируем (required правило уже проверит это)
+    if (value === null || value === undefined) {
+      return Promise.resolve();
+    }
+
     const unit = form.getFieldValue("unit");
     if (unit === "pixels") {
       if (value < 1) {
@@ -190,6 +195,7 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
         <Form.Item
           label="Ширина"
           name="width"
+          validateTrigger={['onBlur', 'onChange']}
           rules={[
             { required: true, message: "Введите ширину" },
             { validator: validateDimension },
@@ -204,6 +210,7 @@ export function InterpolationForm({ onSubmit }: InterpolationFormProps) {
         <Form.Item
           label="Высота"
           name="height"
+          validateTrigger={['onBlur', 'onChange']}
           rules={[
             { required: true, message: "Введите высоту" },
             { validator: validateDimension },

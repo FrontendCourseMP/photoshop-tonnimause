@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Button, Select, Slider, Tooltip } from "antd";
 import {
   EyeOutlined,
@@ -39,6 +39,7 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
     deleteAlphaChannel,
   } = useLayers();
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const isActive = layer.id === activeLayerId;
   const isFirst = index === 0;
   const isLast = index === layers.length - 1;
@@ -91,54 +92,14 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
 
   return (
     <div
+      ref={containerRef}
       className={`${styles.layerInfo} ${isActive ? styles.active : ""}`}
       onClick={handleClick}
     >
-      <div className={styles.name}>{layer.name}</div>
-      <div className={styles.topLine}>
-        <div className={styles.previews}>
-          <div className={styles.preview}>
-            {layer.editedImageData ? (
-              <img src={layer.preview} alt={layer.name} />
-            ) : (
-              <div className={styles.emptyPreview} />
-            )}
-          </div>
-          {layer.hasAlphaChannel && (
-            <div className={`${styles.preview} ${styles.alpha}`}>
-              <img src={layer.alphaChannelPreview} alt="Alpha channel" />
-            </div>
-          )}
-        </div>
-        <div className={styles.buttons}>
-          {layer.hasAlphaChannel && (
-            <>
-              <Tooltip title="Видимость альфа-канала">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={
-                    layer.alphaChannelVisible ? (
-                      <EyeFilledOutlined />
-                    ) : (
-                      <EyeInvisibleFilled />
-                    )
-                  }
-                  onClick={handleAlphaVisibilityToggle}
-                />
-              </Tooltip>
-              <Tooltip title="Удалить альфа-канал">
-                <Button
-                  type="text"
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={handleRemoveAlpha}
-                />
-              </Tooltip>
-            </>
-          )}
-          <Tooltip title={layer.visible ? "Скрыть слой" : "Показать слой"}>
+      <div className={styles.nameLine}>
+        <div className={styles.name}>{layer.name}</div>
+        <div className={styles.nameButtons}>
+          <Tooltip title={layer.visible ? "Скрыть слой" : "Показать слой"} getPopupContainer={() => containerRef.current || document.body}>
             <Button
               type="text"
               size="small"
@@ -146,7 +107,7 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
               onClick={handleVisibilityToggle}
             />
           </Tooltip>
-          <Tooltip title="Удалить слой">
+          <Tooltip title="Удалить слой" getPopupContainer={() => containerRef.current || document.body}>
             <Button
               type="text"
               size="small"
@@ -156,6 +117,55 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
             />
           </Tooltip>
         </div>
+      </div>
+      <div className={styles.topLine}>
+        <div className={styles.previews}>
+          <div className={styles.previewContainer}>
+            <div className={styles.previewLabel}>RGB</div>
+            <div className={styles.preview}>
+              {layer.editedImageData ? (
+                <img src={layer.preview} alt={layer.name} />
+              ) : (
+                <div className={styles.emptyPreview} />
+              )}
+            </div>
+          </div>
+          {layer.hasAlphaChannel && (
+            <div className={styles.previewContainer}>
+              <div className={styles.previewLabel}>Alpha</div>
+              <div className={`${styles.preview} ${styles.alpha}`}>
+                <img src={layer.alphaChannelPreview} alt="Alpha channel" />
+              </div>
+            </div>
+          )}
+        </div>
+        {layer.hasAlphaChannel && (
+          <div className={styles.buttons}>
+            <Tooltip title="Видимость альфа-канала" getPopupContainer={() => containerRef.current || document.body}>
+              <Button
+                type="text"
+                size="small"
+                icon={
+                  layer.alphaChannelVisible ? (
+                    <EyeFilledOutlined />
+                  ) : (
+                    <EyeInvisibleFilled />
+                  )
+                }
+                onClick={handleAlphaVisibilityToggle}
+              />
+            </Tooltip>
+            <Tooltip title="Удалить альфа-канал" getPopupContainer={() => containerRef.current || document.body}>
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={handleRemoveAlpha}
+              />
+            </Tooltip>
+          </div>
+        )}
       </div>
 
       <div className={styles.middleLine}>
@@ -181,7 +191,7 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
       </div>
 
       <div className={styles.bottomLine}>
-        <Tooltip title="Переместить вверх">
+        <Tooltip title="Переместить вверх" getPopupContainer={() => containerRef.current || document.body}>
           <Button
             type="text"
             size="small"
@@ -190,7 +200,7 @@ export function LayerInfo({ layer, index }: LayerInfoProps) {
             disabled={isLast}
           />
         </Tooltip>
-        <Tooltip title="Переместить вниз">
+        <Tooltip title="Переместить вниз" getPopupContainer={() => containerRef.current || document.body}>
           <Button
             type="text"
             size="small"

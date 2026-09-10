@@ -28,6 +28,18 @@ export function StatusBar() {
     } else setActiveLayer(layer);
   }, [activeLayerId, layers]);
 
+  // Получаем полный список опций с текущим значением
+  const getScaleOptions = () => {
+    const hasCurrentValue = scaleOptions.some(opt => opt.value === scaleValue);
+    if (!hasCurrentValue && imageData) {
+      return [
+        ...scaleOptions,
+        { value: scaleValue, label: `${Math.round(scaleValue * 100)}%` }
+      ];
+    }
+    return scaleOptions;
+  };
+
   return (
     <div className={styles.statusBar}>
       <div className={styles.statusItem}>
@@ -53,7 +65,7 @@ export function StatusBar() {
         <Select<number>
           value={scaleValue}
           onChange={setScaleValue}
-          options={scaleOptions}
+          options={getScaleOptions()}
           className={styles.scaleSelect}
           disabled={!imageData}
           // dropdownMatchSelectWidth={false}

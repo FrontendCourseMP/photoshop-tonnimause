@@ -4,6 +4,24 @@
   color: #000;
 }
 
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.nameButtons {
+  display: flex;
+  gap: 2px;
+
+  button {
+    padding: 2px 4px;
+    height: auto;
+  }
+}
+
 .layerInfo {
   display: flex;
   flex-direction: column;
@@ -36,11 +54,38 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .previews {
   display: flex;
+  gap: 8px;
+}
+
+.previewContainer {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
+  align-items: center;
+}
+
+.previewLabel {
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.alphaButtons {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+
+  button {
+    padding: 2px 4px;
+    height: auto;
+    flex-shrink: 0;
+  }
 }
 
 .preview {
@@ -73,10 +118,12 @@
   display: flex;
   gap: 2px;
   margin-left: auto;
+  flex-shrink: 0;
 
   button {
     padding: 2px 4px;
     height: auto;
+    flex-shrink: 0;
   }
 }
 
