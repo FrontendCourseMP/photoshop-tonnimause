@@ -1,17 +1,16 @@
 import { readMetadata } from './metadata';
 import type { ImageDocument } from './types';
-
-// Limits apply before allocating decoded pixel buffers (4 bytes per pixel).
-const MAX_FILE_BYTES = 50 * 1024 * 1024;
-const MAX_PIXELS = 24_000_000;
-const MAX_EDGE = 16_384;
+import { decodeGb7 } from './gb7';
+import { checkDimensions, MAX_FILE_BYTES } from './limits';
 
 export async function openImage(file: File): Promise<ImageDocument> {
   if (file.size > MAX_FILE_BYTES) throw new Error('Файл слишком большой. Максимальный размер — 50 МБ.');
   const buffer = await file.arrayBuffer();
   const source = readMetadata(buffer);
-  if (source.width * source.height > MAX_PIXELS || Math.max(source.width, source.height) > MAX_EDGE) {
-    throw new Error('Изображение слишком большое: максимум 24 Мп и 16 384 пикселя по стороне.');
+  checkDimensions(source.width, source.height);
+  if (source.format === 'GB7') {
+    const decoded = decodeGb7(buffer);
+    return { name: file.name, source, pixels: new ImageData(decoded.pixels.data, source.width, source.height) };
   }
   let bitmap: ImageBitmap;
   try {
@@ -22,6 +21,7 @@ export async function openImage(file: File): Promise<ImageDocument> {
     throw new Error('Браузер не смог открыть изображение. Возможно, файл повреждён.');
   }
   try {
+    checkDimensions(bitmap.width, bitmap.height);
     const canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;

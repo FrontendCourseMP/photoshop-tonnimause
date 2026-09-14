@@ -12,7 +12,7 @@ button.primary:hover { background: #c0e5d3; }
 .brand { display: flex; gap: 10px; align-items: center; }
 .brand-mark { font-size: 28px; color: #acd6c2; }
 h1 { font-size: 15px; font-weight: 600; margin: 0; }
-.toolbar-actions { display: flex; gap: 16px; align-items: center; }
+.toolbar-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .view-switch { display: flex; }
 .view-switch button { border-radius: 0; }
 .view-switch button:first-child { border-radius: 5px 0 0 5px; }
@@ -38,7 +38,7 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .error { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #542f29; padding: 8px 20px; font-size: 13px; }
 .error button { background: transparent; border: 0; padding: 2px 8px; font-size: 22px; }
 .loading { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: #263b32; padding: 10px 16px; border: 1px solid #749383; border-radius: 5px; font-size: 13px; }
-@media (max-width: 650px) {
+@media (max-width: 800px) {
   .toolbar { flex-wrap: wrap; gap: 10px 14px; padding: 10px 12px; }
   .brand { flex: 1; }
   .toolbar-actions { gap: 8px; }
@@ -48,4 +48,18 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
   .empty-state { padding: 18px; }
   .empty-symbol { margin-bottom: 10px; }
 }
-@media (max-width: 400px) { .toolbar-actions { width: 100%; justify-content: space-between; } }
+@media (max-width: 400px) { .toolbar-actions { width: 100%; gap: 6px; } .toolbar-actions button { padding: 8px 10px; } }
+.export-dialog { width: min(440px, calc(100% - 24px)); max-height: calc(100dvh - 24px); overflow: auto; border: 1px solid #52615b; border-radius: 10px; color: #d9e0df; background: #202b2c; padding: 24px; box-shadow: 0 12px 48px #0008; }
+.export-dialog::backdrop { background: #0009; }
+.export-dialog h2 { font-size: 21px; margin: 0 0 10px; }
+.export-source, .export-hint, .export-name { font-size: 13px; color: #a6b7b1; line-height: 1.6; }
+.export-name { overflow-wrap: anywhere; }
+.export-name strong { color: #d9e0df; font-weight: 500; }
+.export-dialog fieldset { border: 0; padding: 0; margin: 20px 0; min-width: 0; }
+.field-label { display: block; margin: 12px 0 8px; font-size: 13px; }
+.export-dialog select { width: 100%; padding: 9px; font: inherit; font-size: 14px; border: 1px solid #52615b; border-radius: 5px; background: #293435; color: inherit; }
+.export-dialog input[type='range'] { width: 100%; }
+.export-dialog input { accent-color: #acd6c2; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.export-error { color: #ffb7a9; font-size: 13px; }

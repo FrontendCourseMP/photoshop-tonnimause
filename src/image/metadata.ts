@@ -1,14 +1,16 @@
 import type { ImageMetadata } from './types';
+import { isGb7, readGb7Header } from './gb7';
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 const frameMarkers = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 const invalid = () => new Error('Файл повреждён: не удалось прочитать сведения об изображении.');
 
 export function readMetadata(buffer: ArrayBuffer): ImageMetadata {
+  if (isGb7(buffer)) return readGb7Header(buffer);
   const bytes = new Uint8Array(buffer);
   if (pngSignature.every((value, i) => bytes[i] === value)) return readPng(buffer);
   if (bytes[0] === 0xff && bytes[1] === 0xd8) return readJpeg(buffer);
-  throw new Error('Этот формат пока не поддерживается. Выбрать файл PNG или JPG.');
+  throw new Error('Формат не поддерживается. Выбрать файл PNG, JPG или GB7.');
 }
 
 function readPng(buffer: ArrayBuffer): ImageMetadata {

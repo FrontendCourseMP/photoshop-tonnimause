@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { ImageViewport } from './components/ImageViewport';
+import { ExportDialog } from './components/ExportDialog';
 import { openImage } from './image/openImage';
 import type { ImageDocument } from './image/types';
 
@@ -11,6 +12,7 @@ export function App() {
   const [error, setError] = useState('');
   const [fit, setFit] = useState(true);
   const [dragging, setDragging] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   async function load(file?: File) {
     if (!file) return;
@@ -34,7 +36,8 @@ export function App() {
         <div className="brand"><span className="brand-mark" aria-hidden="true">▧</span><h1>Изображения</h1></div>
         <div className="toolbar-actions">
           <button className="primary" onClick={() => inputRef.current?.click()}>Открыть файл</button>
-          <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg"
+          <button disabled={!image || loading} onClick={() => setExportOpen(true)}>Сохранить</button>
+          <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg,.gb7"
             aria-label="Выбрать изображение" onChange={event => {
               void load(event.target.files?.[0]); event.target.value = '';
             }} />
@@ -57,7 +60,7 @@ export function App() {
           <h2>Начать с изображения</h2>
           <p>Перетащить файл в эту область<br />или выбрать его на компьютере.</p>
           <button className="primary" onClick={() => inputRef.current?.click()}>Выбрать изображение</button>
-          <span className="format-hint">PNG · JPG</span>
+          <span className="format-hint">PNG · JPG · GB7</span>
         </section>}
         {loading && <div className="loading" role="status">Загрузка изображения…</div>}
       </main>
@@ -70,10 +73,12 @@ export function App() {
             Глубина цвета: <strong>{source.colorBits} бит</strong>
           </span>
           {source.alphaBits > 0 && <span>Альфа-канал: <strong>{source.alphaBits} бит</strong></span>}
+          {source.transparency === 'mask' && <span>Маска: <strong>1 бит</strong></span>}
           {(source.transparency === 'key' || source.transparency === 'palette') && <span>Прозрачность: без альфа-канала</span>}
         </> : <span>Изображение не открыто</span>}
         <span className="status-note">{image ? (fit ? 'По размеру окна' : '1 пиксель = 1 CSS px') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
+      {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
     </div>
   );
 }
