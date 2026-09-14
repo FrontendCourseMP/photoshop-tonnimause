@@ -12,7 +12,9 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:production": "playwright test --config playwright.production.config.ts",
+    "fixtures": "node scripts/create-fixtures.mjs"
   },
   "dependencies": {
     "react": "18.3.1",

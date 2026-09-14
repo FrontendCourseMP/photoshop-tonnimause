@@ -1,0 +1,139 @@
+[
+  {
+    "name": "gray-1bit.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 1,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "gray-16bit.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 16,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "gray-key.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 8,
+    "alphaBits": 0,
+    "transparency": "key"
+  },
+  {
+    "name": "gray-alpha.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 8,
+    "alphaBits": 8,
+    "transparency": "alpha"
+  },
+  {
+    "name": "palette-2bit.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 2,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "palette-transparent.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 2,
+    "alphaBits": 0,
+    "transparency": "palette"
+  },
+  {
+    "name": "rgb-16bit.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 48,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "rgba-16bit.png",
+    "format": "PNG",
+    "width": 17,
+    "height": 13,
+    "colorBits": 48,
+    "alphaBits": 16,
+    "transparency": "alpha"
+  },
+  {
+    "name": "one-pixel.png",
+    "format": "PNG",
+    "width": 1,
+    "height": 1,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "wide.png",
+    "format": "PNG",
+    "width": 3072,
+    "height": 1,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "tall.png",
+    "format": "PNG",
+    "width": 1,
+    "height": 3072,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "large-4k.png",
+    "format": "PNG",
+    "width": 3840,
+    "height": 2160,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "small.jpg",
+    "format": "JPEG",
+    "width": 120,
+    "height": 80,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  },
+  {
+    "name": "rotated-exif.jpg",
+    "format": "JPEG",
+    "width": 120,
+    "height": 80,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none",
+    "displayWidth": 80,
+    "displayHeight": 120
+  },
+  {
+    "name": "large-4k.jpg",
+    "format": "JPEG",
+    "width": 3840,
+    "height": 2160,
+    "colorBits": 24,
+    "alphaBits": 0,
+    "transparency": "none"
+  }
+]
