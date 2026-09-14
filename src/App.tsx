@@ -1,187 +1,79 @@
-import React from "react";
-import { Button, Layout, Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import type { RcFile } from "antd/es/upload/interface";
-import { ImageProvider } from "./contexts/ImageContext";
-import { LayersProvider, useLayers } from "./contexts/LayersContext";
-import { ToolProvider, useTools } from "./contexts/ToolContext";
-import { ColorPickerProvider } from "./contexts/ColorPickerContext";
-import { Canvas } from "./modules/Canvas/Canvas";
-import { LayerPanel } from "./modules/LayerPanel/LayerPanel";
-import { InstrumentsPanel } from "./modules/InstrumentsPanel/InstrumentsPanel";
-import { ColorPickerWindow } from "./modules/ColorPickerWindow/ColorPickerWindow";
-import { StatusBar } from "./components/StatusBar/StatusBar";
-import { detectImageFormat } from "./utils/ImageTypeGetter";
-import { loadGB7Image, loadStandardImage } from "./utils/loadImage";
-import { getColorDepthOfImage } from "./utils/ColorDepthGetter";
-import styles from "./App.module.scss";
-import { CorrectionModal } from "./modules/Curves/CorrectionModal/CorrectionModal";
-import { InterpolationModal } from "./components/InterpolationModal/InterpolationModal";
-import { FilterKernelModal } from "./components/FilterModal/FilterModal";
-import { SaveImageModal } from "./components/SaveModal/SaveModal";
-import { Suspense } from "react";
+import { useRef, useState } from 'react';
+import { ImageViewport } from './components/ImageViewport';
+import { openImage } from './image/openImage';
+import type { ImageDocument } from './image/types';
 
-const LazyFillImageColorModal = React.lazy(async () => {
-  const module = await import(
-    "./components/FillImageWithColorModal/FillImageWithColorModal"
-  );
-  return { default: module.FillImageColorModal };
-});
+export function App() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const requestId = useRef(0);
+  const [image, setImage] = useState<ImageDocument | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [fit, setFit] = useState(true);
+  const [dragging, setDragging] = useState(false);
 
-const { Header, Sider, Content } = Layout;
-
-function AppContent() {
-  const { addLayer, layers, activeLayerId, updateLayer } = useLayers();
-  const { activeTool, setActiveTool } = useTools();
-  const [isCorrectionModalOpen, setCorrectionModalOpen] = React.useState(false);
-  const [isResizeModalOpen, setResizeModalOpen] = React.useState(false);
-  const [isFilterModalOpen, setFilterModalOpen] = React.useState(false);
-  const [isFillColorModalOpen, setFillColorModalOpen] = React.useState(false);
-  const [isSaveModalOpen, setSaveModalOpen] = React.useState(false);
-
-  // Настраиваем позиционирование уведомлений справа сверху над панелью слоев
-  React.useEffect(() => {
-    message.config({
-      top: 64,
-      duration: 3,
-      maxCount: 3,
-      rtl: false,
-      getContainer: () => document.body,
-    });
-  }, []);
-
-  // Открываем модальное окно интерполяции при выборе инструмента resize
-  React.useEffect(() => {
-    if (activeTool === 'resize') {
-      setResizeModalOpen(true);
-      setActiveTool(null); // Сбрасываем активный инструмент после открытия модального окна
-    }
-  }, [activeTool, setActiveTool]);
-
-  const handleFileChange = async (file: RcFile) => {
+  async function load(file?: File) {
+    if (!file) return;
+    const id = ++requestId.current;
+    setError('');
+    setLoading(true);
     try {
-      const format = await detectImageFormat(file);
-      console.log("Detected format:", format);
-
-      const imageData =
-        format === "graybit-7"
-          ? await loadGB7Image(file)
-          : await loadStandardImage(file);
-
-      if (!imageData) {
-        throw new Error("Failed to load image");
-      }
-
-      const colorDepth = await getColorDepthOfImage(file, format);
-      console.log("Color depth:", colorDepth);
-
-      // Если нет активного слоя или слоев вообще нет, создаем новый
-      if (!activeLayerId || layers.length === 0) {
-        addLayer(imageData, colorDepth);
-      } else {
-        // Иначе обновляем существующий активный слой
-        updateLayer(activeLayerId, {
-          originalImageData: imageData,
-          editedImageData: imageData,
-          name: file.name,
-          colorDepth,
-          hasAlphaChannel: true,
-          alphaChannelVisible: true,
-        });
-      }
-
-      message.success("Изображение успешно загружено");
-      return false;
-    } catch (error) {
-      console.error("Error loading image:", error);
-      message.error("Ошибка при загрузке изображения");
-      return Upload.LIST_IGNORE;
+      const next = await openImage(file);
+      if (id === requestId.current) { setImage(next); setFit(true); }
+    } catch (failure) {
+      if (id === requestId.current) setError(failure instanceof Error ? failure.message : 'Не удалось открыть файл.');
+    } finally {
+      if (id === requestId.current) setLoading(false);
     }
-  };
+  }
 
+  const source = image?.source;
   return (
-    <Layout className={styles.layout}>
-      <CorrectionModal
-        isOpen={isCorrectionModalOpen}
-        onClose={() => setCorrectionModalOpen(false)}
-      />
-
-      <InterpolationModal
-        isOpen={isResizeModalOpen}
-        onClose={() => {
-          setResizeModalOpen(false);
-          setActiveTool(null);
-        }}
-      />
-
-      <FilterKernelModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
-      />
-
-      <Suspense
-        fallback={
-          <div style={{ color: "black", fontSize: "2rem" }}>Загрузка…</div>
-        }
-      >
-        <LazyFillImageColorModal
-          isOpen={isFillColorModalOpen}
-          onClose={() => setFillColorModalOpen(false)}
-        />
-      </Suspense>
-
-      <SaveImageModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setSaveModalOpen(false)}
-      />
-
-      <Layout>
-        <Header className={styles.header}>
-          <Upload
-            accept=".png,.jpg,.jpeg,.gb7"
-            showUploadList={false}
-            beforeUpload={handleFileChange}
-          >
-            <Button icon={<UploadOutlined />}>Загрузить изображение</Button>
-          </Upload>
-          <Button onClick={() => setResizeModalOpen(true)}>Интерполяция</Button>
-          <Button onClick={() => setFillColorModalOpen(true)}>
-            Залить цветом
-          </Button>
-          <Button onClick={() => setCorrectionModalOpen(true)}>
-            Градационная коррекция
-          </Button>
-          <Button onClick={() => setFilterModalOpen(true)}>Фильтр ядром</Button>
-          <Button onClick={() => setSaveModalOpen(true)}>Сохранить</Button>
-        </Header>
-        <Layout>
-          <Sider width={56} className={styles.leftSider}>
-            <InstrumentsPanel />
-          </Sider>
-          <Content className={styles.content}>
-            <Canvas />
-            {activeTool === "pipette" && <ColorPickerWindow />}
-          </Content>
-          <Sider width={280} className={styles.rightSider}>
-            <LayerPanel />
-          </Sider>
-        </Layout>
-        <StatusBar />
-      </Layout>
-    </Layout>
-  );
-}
-
-export default function App() {
-  return (
-    <ToolProvider>
-      <ImageProvider>
-        <LayersProvider>
-          <ColorPickerProvider>
-            <AppContent />
-          </ColorPickerProvider>
-        </LayersProvider>
-      </ImageProvider>
-    </ToolProvider>
+    <div className="app">
+      <header className="toolbar">
+        <div className="brand"><span className="brand-mark" aria-hidden="true">▧</span><h1>Изображения</h1></div>
+        <div className="toolbar-actions">
+          <button className="primary" onClick={() => inputRef.current?.click()}>Открыть файл</button>
+          <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg"
+            aria-label="Выбрать изображение" onChange={event => {
+              void load(event.target.files?.[0]); event.target.value = '';
+            }} />
+          <div className="view-switch" aria-label="Режим просмотра">
+            <button disabled={!image} aria-pressed={fit} onClick={() => setFit(true)}>Вписать</button>
+            <button disabled={!image} aria-pressed={!fit} onClick={() => setFit(false)}>100%</button>
+          </div>
+        </div>
+        <span className="file-name" title={image?.name}>{image?.name ?? 'Нет открытого файла'}</span>
+      </header>
+      {error && <div className="error" role="alert"><span>{error}</span>
+        <button aria-label="Закрыть сообщение" onClick={() => setError('')}>×</button></div>}
+      <main className={`workspace ${dragging ? 'is-dragging' : ''}`} aria-busy={loading}
+        onDragOver={event => { event.preventDefault(); setDragging(true); }}
+        onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
+        onDrop={event => { event.preventDefault(); setDragging(false); void load(event.dataTransfer.files[0]); }}>
+        {image ? <ImageViewport image={image} fit={fit} /> : <section className="empty-state">
+          <div className="empty-symbol" aria-hidden="true">▧</div>
+          <p className="eyebrow">ПРОСМОТР ИЗОБРАЖЕНИЙ</p>
+          <h2>Начать с изображения</h2>
+          <p>Перетащить файл в эту область<br />или выбрать его на компьютере.</p>
+          <button className="primary" onClick={() => inputRef.current?.click()}>Выбрать изображение</button>
+          <span className="format-hint">PNG · JPG</span>
+        </section>}
+        {loading && <div className="loading" role="status">Загрузка изображения…</div>}
+      </main>
+      <footer className="statusbar" aria-label="Сведения об исходном изображении">
+        {source ? <>
+          <span className="format-badge">{source.format}</span>
+          <span>Ширина: <strong>{source.width} px</strong></span>
+          <span>Высота: <strong>{source.height} px</strong></span>
+          <span title={`${source.colorModel}; ${source.bitsPerSample} бит на компоненту или индекс палитры`}>
+            Глубина цвета: <strong>{source.colorBits} бит</strong>
+          </span>
+          {source.alphaBits > 0 && <span>Альфа-канал: <strong>{source.alphaBits} бит</strong></span>}
+          {(source.transparency === 'key' || source.transparency === 'palette') && <span>Прозрачность: без альфа-канала</span>}
+        </> : <span>Изображение не открыто</span>}
+        <span className="status-note">{image ? (fit ? 'По размеру окна' : '1 пиксель = 1 CSS px') : 'Файлы обрабатываются в браузере'}</span>
+      </footer>
+    </div>
   );
 }
