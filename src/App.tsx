@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
+import { PixelInfo } from './components/PixelInfo';
+import type { PixelSample } from './image/pipette';
 import { openImage } from './image/openImage';
 import type { ImageDocument } from './image/types';
 
@@ -13,6 +15,8 @@ export function App() {
   const [fit, setFit] = useState(true);
   const [dragging, setDragging] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [pipette, setPipette] = useState(false);
+  const [picked, setPicked] = useState<{ image: ImageDocument; sample: PixelSample } | null>(null);
 
   async function load(file?: File) {
     if (!file) return;
@@ -37,6 +41,7 @@ export function App() {
         <div className="toolbar-actions">
           <button className="primary" onClick={() => inputRef.current?.click()}>Открыть файл</button>
           <button disabled={!image || loading} onClick={() => setExportOpen(true)}>Сохранить</button>
+          <button disabled={!image || loading} aria-pressed={pipette} onClick={() => setPipette(value => !value)}>Пипетка</button>
           <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg,.gb7"
             aria-label="Выбрать изображение" onChange={event => {
               void load(event.target.files?.[0]); event.target.value = '';
@@ -54,7 +59,7 @@ export function App() {
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
         onDrop={event => { event.preventDefault(); setDragging(false); void load(event.dataTransfer.files[0]); }}>
-        {image ? <ImageWorkspace image={image} fit={fit} /> : <section className="empty-state">
+        {image ? <ImageWorkspace image={image} fit={fit} pipette={pipette} onPick={sample => setPicked({ image, sample })} /> : <section className="empty-state">
           <div className="empty-symbol" aria-hidden="true">▧</div>
           <p className="eyebrow">ПРОСМОТР ИЗОБРАЖЕНИЙ</p>
           <h2>Начать с изображения</h2>
@@ -64,6 +69,7 @@ export function App() {
         </section>}
         {loading && <div className="loading" role="status">Загрузка изображения…</div>}
       </main>
+      {pipette && <PixelInfo sample={picked?.image === image ? picked?.sample ?? null : null} />}
       <footer className="statusbar" aria-label="Сведения об исходном изображении">
         {source ? <>
           <span className="format-badge">{source.format}</span>

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageDocument, Raster } from '../image/types';
+import { pixelAtPoint, type PixelSample } from '../image/pipette';
 
-export function ImageViewport({ image, pixels, fit }: { image: ImageDocument; pixels: Raster; fit: boolean }) {
+export function ImageViewport({ image, pixels, fit, pipette, onPick }: {
+  image: ImageDocument; pixels: Raster; fit: boolean; pipette: boolean; onPick: (sample: PixelSample) => void;
+}) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [available, setAvailable] = useState({ width: 1, height: 1 });
@@ -28,6 +31,11 @@ export function ImageViewport({ image, pixels, fit }: { image: ImageDocument; pi
       <div className="canvas-frame" style={{ width: Math.max(available.width, image.pixels.width * scale + 40),
         height: Math.max(available.height, image.pixels.height * scale + 40) }}>
         <canvas ref={canvasRef} aria-label={`Изображение ${image.name}`}
+          className={pipette ? 'pipette-active' : undefined} onClick={event => {
+            if (!pipette || event.button !== 0) return;
+            const sample = pixelAtPoint(image.pixels, event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+            if (sample) onPick(sample);
+          }}
           style={{ width: image.pixels.width * scale, height: image.pixels.height * scale }} />
       </div>
     </div>
