@@ -61,7 +61,7 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .export-dialog input[type='range'] { width: 100%; }
 .export-dialog input { accent-color: #acd6c2; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; position: sticky; bottom: -24px; padding: 12px 0; background: #202b2c; }
 .export-error { color: #ffb7a9; font-size: 13px; }
 .toolbar-actions > button[aria-pressed='true'] { background: #41564d; border-color: #acd6c2; }
 .pipette-active { cursor: crosshair; }
