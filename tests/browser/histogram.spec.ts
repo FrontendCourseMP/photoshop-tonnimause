@@ -16,7 +16,7 @@ test('levels dialog histogram switches channels and scale without changing the i
   await page.getByLabel('Шкала гистограммы').selectOption('log');
   await expect(page.getByRole('dialog')).toContainText('log(1 + количество пикселей)');
   await page.setViewportSize({ width: 320, height: 568 });
-  await expect(page.getByRole('button', { name: 'Закрыть', exact: true })).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Отмена', exact: true })).toBeInViewport();
   await page.keyboard.press('Escape');
   await expect(button).toBeFocused();
   expect(await page.locator('canvas').evaluate((c: HTMLCanvasElement) => c.toDataURL())).toBe(before);

@@ -5,7 +5,7 @@ import { LevelsDialog } from './components/LevelsDialog';
 import { PixelInfo } from './components/PixelInfo';
 import type { PixelSample } from './image/pipette';
 import { openImage } from './image/openImage';
-import type { ImageDocument } from './image/types';
+import type { ImageDocument, Raster } from './image/types';
 
 export function App() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -17,6 +17,7 @@ export function App() {
   const [dragging, setDragging] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
+  const [levelsPreview, setLevelsPreview] = useState<Raster | null>(null);
   const [pipette, setPipette] = useState(false);
   const [picked, setPicked] = useState<{ image: ImageDocument; sample: PixelSample } | null>(null);
 
@@ -62,7 +63,7 @@ export function App() {
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
         onDrop={event => { event.preventDefault(); setDragging(false); void load(event.dataTransfer.files[0]); }}>
-        {image ? <ImageWorkspace image={image} fit={fit} pipette={pipette} onPick={sample => setPicked({ image, sample })} /> : <section className="empty-state">
+        {image ? <ImageWorkspace image={image} preview={levelsPreview} fit={fit} pipette={pipette} onPick={sample => setPicked({ image, sample })} /> : <section className="empty-state">
           <div className="empty-symbol" aria-hidden="true">▧</div>
           <p className="eyebrow">ПРОСМОТР ИЗОБРАЖЕНИЙ</p>
           <h2>Начать с изображения</h2>
@@ -88,7 +89,12 @@ export function App() {
         <span className="status-note">{image ? (fit ? 'По размеру окна' : '1 пиксель = 1 CSS px') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
       {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
-      {levelsOpen && image && <LevelsDialog image={image} onClose={() => setLevelsOpen(false)} />}
+      {levelsOpen && image && <LevelsDialog image={image} onPreview={setLevelsPreview}
+        onClose={() => { setLevelsPreview(null); setLevelsOpen(false); }}
+        onApply={pixels => {
+          setImage({ ...image, pixels: new ImageData(pixels.data, pixels.width, pixels.height) });
+          setLevelsPreview(null); setLevelsOpen(false);
+        }} />}
     </div>
   );
 }

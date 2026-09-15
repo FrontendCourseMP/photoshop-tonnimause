@@ -23,6 +23,6 @@ test('input levels persist per channel, constrain values, reset and support keyb
   await page.getByRole('slider', { name: 'Маркер чёрной точки', exact: true }).focus();
   await page.keyboard.press('ArrowRight'); await expect(black).toHaveValue('1');
   await page.setViewportSize({ width: 320, height: 568 });
-  await expect(page.getByRole('button', { name: 'Закрыть', exact: true })).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Отмена', exact: true })).toBeInViewport();
   await page.screenshot({ path: 'test-results/input-levels-mobile.png' });
 });
