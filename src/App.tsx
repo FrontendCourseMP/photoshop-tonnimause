@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ImageViewport } from './components/ImageViewport';
+import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
 import { openImage } from './image/openImage';
 import type { ImageDocument } from './image/types';
@@ -54,7 +54,7 @@ export function App() {
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
         onDrop={event => { event.preventDefault(); setDragging(false); void load(event.dataTransfer.files[0]); }}>
-        {image ? <ImageViewport image={image} fit={fit} /> : <section className="empty-state">
+        {image ? <ImageWorkspace image={image} fit={fit} /> : <section className="empty-state">
           <div className="empty-symbol" aria-hidden="true">▧</div>
           <p className="eyebrow">ПРОСМОТР ИЗОБРАЖЕНИЙ</p>
           <h2>Начать с изображения</h2>

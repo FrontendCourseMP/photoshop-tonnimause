@@ -28,7 +28,7 @@ h1 { font-size: 15px; font-weight: 600; margin: 0; }
 h2 { font-size: clamp(21px, 3vw, 29px); font-weight: 500; margin: 12px 0; }
 .empty-state p:not(.eyebrow) { color: #9aaead; line-height: 1.7; font-size: 14px; margin-bottom: 24px; }
 .format-hint { display: block; color: #809390; font-size: 11px; margin-top: 16px; letter-spacing: .12em; }
-.viewport { width: 100%; height: 100%; min-width: 0; overflow: auto; }
+.viewport { flex: 1; height: 100%; min-width: 0; min-height: 0; overflow: auto; }
 .canvas-frame { display: grid; place-items: center; padding: 20px; }
 canvas { display: block; background-color: #ddd; background-image: conic-gradient(#bbb 25%, #ddd 0 50%, #bbb 0 75%, #ddd 0); background-size: 16px 16px; box-shadow: 0 3px 18px #0005; }
 .statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 10px 20px; min-height: 40px; background: #202b2c; border-top: 1px solid #3b4849; font-size: 12px; color: #9fb1ae; }
@@ -63,3 +63,22 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .export-error { color: #ffb7a9; font-size: 13px; }
+.channel-panel { width: 190px; flex-shrink: 0; padding: 14px; overflow: auto; background: #202b2c; border-left: 1px solid #3b4849; }
+.channel-panel h2 { font-size: 14px; margin: 0 0 12px; }
+.channel-list { display: flex; flex-direction: column; gap: 8px; }
+.channel-button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 6px; }
+.channel-button[aria-pressed='true'] { border-color: #acd6c2; background: #33483e; }
+.channel-button img { width: 44px; height: 44px; object-fit: contain; background: #111; }
+.channel-button span { font-size: 12px; }
+.channel-button small { display: block; font-size: 10px; margin-top: 5px; color: #a6b7b1; }
+.channel-panel p { font-size: 11px; line-height: 1.5; color: #a6b7b1; }
+@media (max-width: 600px) {
+  .workspace { flex-direction: column; }
+  .channel-panel { width: 100%; padding: 6px 10px; border-left: 0; border-top: 1px solid #3b4849; }
+  .channel-panel h2 { font-size: 12px; margin-bottom: 5px; }
+  .channel-list { flex-direction: row; overflow-x: auto; }
+  .channel-button { flex-shrink: 0; gap: 5px; }
+  .channel-button img { width: 28px; height: 28px; }
+  .channel-button small { margin-top: 2px; }
+  .channel-panel p { display: none; }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ImageDocument } from '../image/types';
+import type { ImageDocument, Raster } from '../image/types';
 
-export function ImageViewport({ image, fit }: { image: ImageDocument; fit: boolean }) {
+export function ImageViewport({ image, pixels, fit }: { image: ImageDocument; pixels: Raster; fit: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [available, setAvailable] = useState({ width: 1, height: 1 });
@@ -19,8 +19,8 @@ export function ImageViewport({ image, fit }: { image: ImageDocument; fit: boole
     if (!canvas) return;
     canvas.width = image.pixels.width;
     canvas.height = image.pixels.height;
-    canvas.getContext('2d')?.putImageData(image.pixels, 0, 0);
-  }, [image]);
+    canvas.getContext('2d')?.putImageData(new ImageData(pixels.data, pixels.width, pixels.height), 0, 0);
+  }, [image, pixels]);
   const scale = fit ? Math.min(1, Math.max(1, available.width - 40) / image.pixels.width,
     Math.max(1, available.height - 40) / image.pixels.height) : 1;
   return (
