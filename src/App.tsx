@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
+import { LevelsDialog } from './components/LevelsDialog';
 import { PixelInfo } from './components/PixelInfo';
 import type { PixelSample } from './image/pipette';
 import { openImage } from './image/openImage';
@@ -15,6 +16,7 @@ export function App() {
   const [fit, setFit] = useState(true);
   const [dragging, setDragging] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [levelsOpen, setLevelsOpen] = useState(false);
   const [pipette, setPipette] = useState(false);
   const [picked, setPicked] = useState<{ image: ImageDocument; sample: PixelSample } | null>(null);
 
@@ -42,6 +44,7 @@ export function App() {
           <button className="primary" onClick={() => inputRef.current?.click()}>Открыть файл</button>
           <button disabled={!image || loading} onClick={() => setExportOpen(true)}>Сохранить</button>
           <button disabled={!image || loading} aria-pressed={pipette} onClick={() => setPipette(value => !value)}>Пипетка</button>
+          <button disabled={!image || loading} onClick={() => setLevelsOpen(true)}>Уровни</button>
           <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg,.gb7"
             aria-label="Выбрать изображение" onChange={event => {
               void load(event.target.files?.[0]); event.target.value = '';
@@ -85,6 +88,7 @@ export function App() {
         <span className="status-note">{image ? (fit ? 'По размеру окна' : '1 пиксель = 1 CSS px') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
       {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
+      {levelsOpen && image && <LevelsDialog image={image} onClose={() => setLevelsOpen(false)} />}
     </div>
   );
 }
