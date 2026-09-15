@@ -2,12 +2,16 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { imageChannels } from '../image/channels';
 import { histogram, histogramHeights, type HistogramScale, type LevelsChannel } from '../image/histogram';
 import type { ImageDocument } from '../image/types';
+import { InputLevels } from './InputLevels';
+import { defaultLevels, updateLevels, type LevelsSettings } from '../image/levels';
 
 export function LevelsDialog({ image, onClose }: { image: ImageDocument; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [channel, setChannel] = useState<LevelsChannel>('master');
   const [scale, setScale] = useState<HistogramScale>('linear');
   const maximum = image.source.format === 'GB7' ? 127 : 255;
+  const [settings, setSettings] = useState<LevelsSettings>({});
+  const values = settings[channel] ?? defaultLevels(maximum);
   const bins = useMemo(() => histogram(image.pixels, channel, maximum), [image, channel, maximum]);
   const heights = useMemo(() => histogramHeights(bins, scale), [bins, scale]);
   const peak = Math.max(...bins);
@@ -36,7 +40,11 @@ export function LevelsDialog({ image, onClose }: { image: ImageDocument; onClose
         data-count={bins[index]}><title>{index}: {bins[index]} пикселей</title></rect>)}
     </svg>
     <div className="histogram-axis"><span>0</span><span>{maximum}</span></div>
+    <InputLevels values={values} maximum={maximum} onChange={(field, value) => setSettings(previous => ({
+      ...previous, [channel]: updateLevels(previous[channel] ?? defaultLevels(maximum), field, value, maximum),
+    }))} />
     <p className="export-hint">Всего пикселей: {image.pixels.width * image.pixels.height}. Учитываются и прозрачные пиксели. Гистограмма не зависит от видимости каналов.</p>
-    <div className="dialog-actions"><button onClick={onClose}>Закрыть</button></div>
+    <p className="export-hint">Настройки каналов сохраняются при переключении. Предпросмотр и применение будут подключены следующим этапом.</p>
+    <div className="dialog-actions"><button onClick={() => setSettings({})}>Сброс</button><button onClick={onClose}>Закрыть</button></div>
   </dialog>;
 }
