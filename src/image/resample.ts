@@ -41,6 +41,24 @@ export const interpolationMethods = {
 } satisfies Record<string, { label: string; description: string; sample: Sampler }>;
 export type InterpolationMethod = keyof typeof interpolationMethods;
 
+/** Render a tile in the coordinate system of the complete resized image. */
+export function resizeRegion(source: Raster, width: number, height: number,
+  region: { x: number; y: number; width: number; height: number }, method: InterpolationMethod = 'bilinear'): Raster {
+  checkDimensions(source.width, source.height);
+  checkDimensions(region.width, region.height);
+  if (![width, height, region.x, region.y].every(Number.isSafeInteger) || width < 1 || height < 1
+    || region.x < 0 || region.y < 0 || region.x + region.width > width || region.y + region.height > height
+    || source.data.length !== source.width * source.height * 4) throw new Error('Неверная область масштабирования.');
+  if (!Object.hasOwn(interpolationMethods, method)) throw new Error('Неизвестный метод интерполяции.');
+  const data = new Uint8ClampedArray(region.width * region.height * 4);
+  const sample = interpolationMethods[method].sample;
+  for (let y = 0; y < region.height; y++) for (let x = 0; x < region.width; x++) {
+    sample(source, (region.x + x + 0.5) * source.width / width - 0.5,
+      (region.y + y + 0.5) * source.height / height - 0.5, data, (y * region.width + x) * 4);
+  }
+  return { width: region.width, height: region.height, data };
+}
+
 /** Pure raster resizing, independent of browser drawing and CSS. Identity also returns a separate buffer. */
 export function resizeRaster(source: Raster, width: number, height: number, method: InterpolationMethod = 'bilinear'): Raster {
   checkDimensions(source.width, source.height);

@@ -64,10 +64,10 @@ test('large image fits viewport without changing its pixels; 100% scrolls', asyn
     name: 'large.png', mimeType: 'image/png', buffer: png(2500, 1600),
   });
   const canvas = page.locator('canvas');
-  await expect(canvas).toHaveAttribute('width', '2500');
+  await expect(canvas).toHaveAttribute('data-source-width', '2500');
   expect((await canvas.boundingBox())!.width).toBeLessThan(1280);
   await page.getByRole('button', { name: '100%', exact: true }).click();
-  expect((await canvas.boundingBox())!.width).toBe(2500);
+  await expect(canvas).toHaveAttribute('width', '2500');
   expect(await page.locator('.viewport').evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true);
   await page.getByRole('button', { name: 'Вписать', exact: true }).click();
   await page.setViewportSize({ width: 360, height: 740 });

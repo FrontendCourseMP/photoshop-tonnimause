@@ -95,6 +95,8 @@ test('alpha midtones change transparency without changing decoded RGB', async ({
 test('4k preview can be cancelled immediately with no delayed correction', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Выбрать изображение', { exact: true }).setInputFiles(resolve('tests/fixtures/images/large-4k.png'));
+  await expect(page.locator('canvas')).toHaveAttribute('data-source-width', '3840');
+  await page.getByRole('button', { name: '100%', exact: true }).click();
   await expect(page.locator('canvas')).toHaveAttribute('width', '3840');
   const before = await pixel(page);
   await page.getByRole('button', { name: 'Уровни', exact: true }).click();

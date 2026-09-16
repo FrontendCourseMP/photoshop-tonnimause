@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
 import { LevelsDialog } from './components/LevelsDialog';
+import { interpolationMethods, type InterpolationMethod } from './image/resample';
 import { PixelInfo } from './components/PixelInfo';
 import type { PixelSample } from './image/pipette';
 import { openImage } from './image/openImage';
@@ -14,6 +15,8 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fit, setFit] = useState(true);
+  const [zoom, setZoom] = useState(100);
+  const [method, setMethod] = useState<InterpolationMethod>('bilinear');
   const [dragging, setDragging] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
@@ -52,7 +55,7 @@ export function App() {
             }} />
           <div className="view-switch" aria-label="Режим просмотра">
             <button disabled={!image} aria-pressed={fit} onClick={() => setFit(true)}>Вписать</button>
-            <button disabled={!image} aria-pressed={!fit} onClick={() => setFit(false)}>100%</button>
+            <button disabled={!image} aria-pressed={!fit && zoom === 100} onClick={() => { setFit(false); setZoom(100); }}>100%</button>
           </div>
         </div>
         <span className="file-name" title={image?.name}>{image?.name ?? 'Нет открытого файла'}</span>
@@ -63,7 +66,7 @@ export function App() {
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
         onDrop={event => { event.preventDefault(); setDragging(false); void load(event.dataTransfer.files[0]); }}>
-        {image ? <ImageWorkspace image={image} preview={levelsPreview} fit={fit} pipette={pipette} onPick={sample => setPicked({ image, sample })} /> : <section className="empty-state">
+        {image ? <ImageWorkspace image={image} preview={levelsPreview} fit={fit} zoom={zoom} method={method} onZoom={setZoom} pipette={pipette} onPick={sample => setPicked({ image, sample })} /> : <section className="empty-state">
           <div className="empty-symbol" aria-hidden="true">▧</div>
           <p className="eyebrow">ПРОСМОТР ИЗОБРАЖЕНИЙ</p>
           <h2>Начать с изображения</h2>
@@ -75,6 +78,12 @@ export function App() {
       </main>
       {pipette && <PixelInfo sample={picked?.image === image ? picked?.sample ?? null : null} />}
       <footer className="statusbar" aria-label="Сведения об исходном изображении">
+        <label className="zoom-control">Масштаб: {zoom}%<input aria-label="Масштаб просмотра" type="range" min="12" max="300" step="0.01"
+          disabled={!image} value={zoom} onChange={event => { setFit(false); setZoom(Number(event.target.value)); }} /></label>
+        <label>Интерполяция <select aria-label="Интерполяция просмотра" value={method} disabled={!image}
+          onChange={event => setMethod(event.target.value as InterpolationMethod)}>
+          {Object.entries(interpolationMethods).map(([id, item]) => <option key={id} value={id}>{item.label}</option>)}
+        </select></label>
         {source ? <>
           <span className="format-badge">{source.format}</span>
           <span>Ширина: <strong>{source.width} px</strong></span>
@@ -86,7 +95,7 @@ export function App() {
           {source.transparency === 'mask' && <span>Маска: <strong>1 бит</strong></span>}
           {(source.transparency === 'key' || source.transparency === 'palette') && <span>Прозрачность: без альфа-канала</span>}
         </> : <span>Изображение не открыто</span>}
-        <span className="status-note">{image ? (fit ? 'По размеру окна' : '1 пиксель = 1 CSS px') : 'Файлы обрабатываются в браузере'}</span>
+        <span className="status-note">{image ? (fit ? 'По размеру окна' : 'Масштаб просмотра') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
       {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
       {levelsOpen && image && <LevelsDialog image={image} onPreview={setLevelsPreview}

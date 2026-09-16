@@ -33,6 +33,9 @@ h2 { font-size: clamp(21px, 3vw, 29px); font-weight: 500; margin: 12px 0; }
 canvas { display: block; background-color: #ddd; background-image: conic-gradient(#bbb 25%, #ddd 0 50%, #bbb 0 75%, #ddd 0); background-size: 16px 16px; box-shadow: 0 3px 18px #0005; }
 .statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 10px 20px; min-height: 40px; background: #202b2c; border-top: 1px solid #3b4849; font-size: 12px; color: #9fb1ae; }
 .statusbar strong { color: #d9e0df; font-weight: 500; }
+.zoom-control { display: flex; align-items: center; gap: 8px; }
+.zoom-control input { width: 110px; accent-color: #acd6c2; }
+.statusbar select { max-width: 150px; color: inherit; background: #202b2c; border: 1px solid #52615b; }
 .format-badge { font-size: 10px; padding: 3px 6px; border: 1px solid #50615b; border-radius: 3px; color: #b1d6c3; }
 .status-note { margin-left: auto; }
 .error { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #542f29; padding: 8px 20px; font-size: 13px; }

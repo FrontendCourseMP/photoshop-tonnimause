@@ -65,16 +65,19 @@ test('pipette selects distinct source pixels after CSS scaling and viewport chan
   for (const width of [1280, 360, 768]) {
     await page.setViewportSize({ width, height: 800 });
     const canvas = page.locator('canvas');
-    // Wait for ResizeObserver and layout before taking the click's geometry.
-    await expect.poll(async () => (await canvas.boundingBox())!.width).toBeLessThan(width);
     for (const fraction of [0.2, 0.7]) {
+      // ResizeObserver, fit recalculation and the raster render run in successive frames.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve)))));
       const point = await canvas.evaluate((c: HTMLCanvasElement, fraction) => {
-        const rect = c.getBoundingClientRect();
-        const clientX = Math.floor(rect.left + rect.width * fraction);
-        const clientY = Math.floor(rect.top + rect.height * fraction);
-        const x = Math.floor((clientX - rect.left) * c.width / rect.width);
-        const y = Math.floor((clientY - rect.top) * c.height / rect.height);
-        const rgb = Array.from(c.getContext('2d')!.getImageData(x, y, 1, 1).data).slice(0, 3);
+        const rect = document.querySelector('.image-surface')!.getBoundingClientRect();
+        const viewport = document.querySelector('.viewport')!.getBoundingClientRect();
+        const startX = Math.max(rect.left, viewport.left), startY = Math.max(rect.top, viewport.top);
+        const clientX = Math.floor(startX + (Math.min(rect.right, viewport.right) - startX) * fraction);
+        const clientY = Math.floor(startY + (Math.min(rect.bottom, viewport.bottom) - startY) * fraction);
+        const x = Math.floor((clientX - rect.left) * Number(c.dataset.sourceWidth) / rect.width);
+        const y = Math.floor((clientY - rect.top) * Number(c.dataset.sourceHeight) / rect.height);
+        // Independent known generator values, not the interpolated canvas pixel.
+        const rgb = [0, 1, 2].map(channel => Math.round(((x + y + channel * 5) % 17) * 255 / 16));
         return { clientX, clientY, x, y, rgb };
       }, fraction);
       await page.mouse.click(point.clientX, point.clientY);

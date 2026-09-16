@@ -45,6 +45,8 @@ for (const input of ['png', 'jpg', 'gb7'] as const) for (const output of ['png',
     await fileInput.setInputFiles({ name: `sample.${input}`, mimeType: 'application/octet-stream', buffer });
     const status = page.getByLabel('Сведения об исходном изображении');
     await expect(status).toContainText(`Ширина: ${expectedWidth} px`);
+    await page.getByRole('button', { name: '100%', exact: true }).click();
+    await expect(page.locator('canvas')).toHaveAttribute('width', String(expectedWidth));
     const before = await page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
       Array.from(canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data));
     // Saving from the fitted/100% view must not resize the exported raster.
@@ -93,7 +95,7 @@ test('JPEG export fills transparent pixels with white', async ({ page }) => {
   const jpg = await save(page, 'jpg');
   await input.setInputFiles({ name: jpg.name, mimeType: 'image/jpeg', buffer: jpg.buffer });
   await expect(page.getByLabel('Сведения об исходном изображении')).toContainText('JPEG');
-  expect(await page.locator('canvas').evaluate((c: HTMLCanvasElement) => Array.from(c.getContext('2d')!.getImageData(8, 8, 1, 1).data)))
+  await expect.poll(() => page.locator('canvas').evaluate((c: HTMLCanvasElement) => Array.from(c.getContext('2d')!.getImageData(8, 8, 1, 1).data)))
     .toEqual([255, 255, 255, 255]);
 });
 
@@ -142,6 +144,7 @@ for (const sample of [
       name: sample.name, mimeType: 'application/octet-stream', buffer: original,
     });
     const canvas = page.locator('canvas');
+    await page.getByRole('button', { name: '100%', exact: true }).click();
     await expect(canvas).toHaveAttribute('width', String(sample.width));
     await expect(canvas).toHaveAttribute('height', String(sample.height));
     expect(await canvas.evaluate((canvas: HTMLCanvasElement) => {

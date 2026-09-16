@@ -10,8 +10,8 @@ for (const fixture of fixtures) {
     await page.getByLabel('Выбрать изображение', { exact: true }).setInputFiles(
       resolve('tests/fixtures/images', fixture.name));
     const canvas = page.locator('canvas');
-    await expect(canvas).toHaveAttribute('width', String(fixture.displayWidth ?? fixture.width));
-    await expect(canvas).toHaveAttribute('height', String(fixture.displayHeight ?? fixture.height));
+    await expect(canvas).toHaveAttribute('data-source-width', String(fixture.displayWidth ?? fixture.width));
+    await expect(canvas).toHaveAttribute('data-source-height', String(fixture.displayHeight ?? fixture.height));
     const status = page.getByLabel('Сведения об исходном изображении');
     await expect(status).toContainText(`Ширина: ${fixture.width} px`);
     await expect(status).toContainText(`Высота: ${fixture.height} px`);
@@ -35,8 +35,8 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 640, height: 360 }
     await page.goto('/');
     await page.getByLabel('Выбрать изображение', { exact: true }).setInputFiles(
       resolve('tests/fixtures/images/large-4k.png'));
-    await expect(page.locator('canvas')).toHaveAttribute('width', '3840');
-    await expect.poll(async () => (await page.locator('canvas').boundingBox())!.width).toBeLessThan(viewport.width);
+    await expect(page.locator('canvas')).toHaveAttribute('data-source-width', '3840');
+    await expect(page.getByRole('slider', { name: 'Масштаб просмотра' })).toHaveAttribute('min', '12');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const status = await page.getByLabel('Сведения об исходном изображении').boundingBox();
     expect(status!.y + status!.height).toBeLessThanOrEqual(viewport.height);
