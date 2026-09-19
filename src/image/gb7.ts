@@ -17,7 +17,7 @@ export function readGb7Header(buffer: ArrayBuffer): ImageMetadata {
   if (flags > 1 || view.getUint16(10) !== 0) {
     throw new Error('Зарезервированные биты и байты GB7 должны быть равны нулю.');
   }
-  // DataView defaults to big-endian, as required by the assignment.
+  // DataView по умолчанию использует big-endian, как требуется в задании.
   const width = view.getUint16(6);
   const height = view.getUint16(8);
   if (width === 0 || height === 0) throw new Error('Ширина и высота GB7 не могут быть равны нулю.');
@@ -61,7 +61,7 @@ export function encodeGb7(pixels: Raster, includeMask: boolean): Uint8Array<Arra
   for (let index = 0; index < width * height; index++) {
     const at = index * 4;
     const alpha = data[at + 3]!;
-    // A documented luma approximation on stored RGB values, not a colour-managed conversion.
+    // Приближённая яркость по значениям RGB, без учёта цветового профиля.
     let gray = (299 * data[at]! + 587 * data[at + 1]! + 114 * data[at + 2]!) / 1000;
     if (!includeMask) gray = (gray * alpha + 255 * (255 - alpha)) / 255;
     const level = Math.round(gray * 127 / 255);

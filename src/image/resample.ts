@@ -25,7 +25,7 @@ const bilinear: Sampler = (source, x, y, output, offset) => {
     green += source.data[at + 1]! * weightedAlpha;
     blue += source.data[at + 2]! * weightedAlpha;
   }
-  // Interpolate premultiplied RGB, then return straight RGBA. Hidden colors cannot bleed into visible edges.
+  // Интерполируем RGB с учётом альфы, затем возвращаем обычный RGBA, чтобы скрытые цвета не окрашивали края.
   if (alpha > 0) {
     output[offset] = Math.round(red / alpha);
     output[offset + 1] = Math.round(green / alpha);
@@ -34,14 +34,14 @@ const bilinear: Sampler = (source, x, y, output, offset) => {
   output[offset + 3] = Math.round(alpha);
 };
 
-/** Add a sampler and its description here to introduce another interpolation method. */
+/** Для нового метода интерполяции добавить сюда функцию и описание. */
 export const interpolationMethods = {
   nearest: { label: 'Ближайший сосед', description: 'Выбирает ближайший пиксель без смешивания цветов. Подходит для пиксельной графики и чётких границ масок.', sample: nearest },
   bilinear: { label: 'Билинейная', description: 'Смешивает четыре соседних пикселя с учётом прозрачности. Даёт плавные переходы при изменении размера.', sample: bilinear },
 } satisfies Record<string, { label: string; description: string; sample: Sampler }>;
 export type InterpolationMethod = keyof typeof interpolationMethods;
 
-/** Render a tile in the coordinate system of the complete resized image. */
+/** Рассчитываем фрагмент в координатах полного масштабированного изображения. */
 export function resizeRegion(source: Raster, width: number, height: number,
   region: { x: number; y: number; width: number; height: number }, method: InterpolationMethod = 'bilinear'): Raster {
   checkDimensions(source.width, source.height);
@@ -59,7 +59,7 @@ export function resizeRegion(source: Raster, width: number, height: number,
   return { width: region.width, height: region.height, data };
 }
 
-/** Pure raster resizing, independent of browser drawing and CSS. Identity also returns a separate buffer. */
+/** Изменение размера без canvas и CSS. Даже при совпадении размеров возвращается отдельный буфер. */
 export function resizeRaster(source: Raster, width: number, height: number, method: InterpolationMethod = 'bilinear'): Raster {
   checkDimensions(source.width, source.height);
   checkDimensions(width, height);

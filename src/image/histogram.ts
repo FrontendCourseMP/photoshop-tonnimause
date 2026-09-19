@@ -8,8 +8,8 @@ const linear = Float64Array.from({ length: 256 }, (_, value) => {
   return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
 });
 
-/** Counts every source pixel, including hidden colors. Alpha is never used as a weight.
- * Master: relative luminance, https://www.w3.org/WAI/GL/wiki/Relative_luminance
+/** Учитываем все исходные пиксели, включая скрытые цвета, без взвешивания по альфе.
+ * Master: относительная светлота, https://www.w3.org/WAI/GL/wiki/Relative_luminance
  */
 export function histogram(source: Raster, channel: LevelsChannel, maximum: 127 | 255): Uint32Array {
   const bins = new Uint32Array(maximum + 1);

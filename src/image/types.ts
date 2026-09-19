@@ -1,4 +1,4 @@
-/** Source metadata is independent of the browser's 8-bit RGBA display buffer. */
+/** Метаданные исходного файла не зависят от 8-битного RGBA-буфера браузера. */
 export interface ImageMetadata {
   format: 'PNG' | 'JPEG' | 'GB7';
   width: number;
@@ -10,7 +10,7 @@ export interface ImageMetadata {
   transparency: 'none' | 'alpha' | 'key' | 'palette' | 'mask';
 }
 
-/** Uncompressed pixels in row order. Pure codecs do not depend on a DOM canvas. */
+/** Несжатые пиксели по строкам. Кодеки не зависят от canvas. */
 export interface Raster {
   width: number;
   height: number;

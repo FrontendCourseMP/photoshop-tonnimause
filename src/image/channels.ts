@@ -13,7 +13,7 @@ export function imageChannels(source: ImageMetadata): Channel[] {
   return channels;
 }
 
-/** Viewing never changes the source raster. Alpha alone is an opaque grayscale mask. */
+/** Просмотр не меняет исходные пиксели. Альфа отдельно отображается как непрозрачная серая маска. */
 export function channelView(source: Raster, enabled: readonly ChannelId[]): Raster {
   const data = new Uint8ClampedArray(source.data.length);
   const gray = enabled.includes('gray');
@@ -36,7 +36,7 @@ export function channelView(source: Raster, enabled: readonly ChannelId[]): Rast
   return { width: source.width, height: source.height, data };
 }
 
-/** Sample the source channel directly, including values hidden by transparency. */
+/** Читаем исходный канал, включая значения, скрытые прозрачностью. */
 export function channelThumbnail(source: Raster, channel: ChannelId): Raster {
   const scale = Math.min(1, 64 / source.width, 64 / source.height);
   const width = Math.max(1, Math.round(source.width * scale));

@@ -12,7 +12,7 @@ export function updateLevels(current: InputLevels, field: keyof InputLevels, val
   return { ...current, gamma: Math.max(0.1, Math.min(9.9, value)) };
 }
 
-// The midpoint is where the transformed normalized component becomes 0.5.
+// Средний маркер соответствует значению 0,5 после преобразования нормированного компонента.
 export function midpoint(levels: InputLevels): number {
   return levels.black + (levels.white - levels.black) * 0.5 ** levels.gamma;
 }
@@ -28,7 +28,7 @@ export function levelsLut(levels: InputLevels, maximum: number): Uint8ClampedArr
   });
 }
 
-/** Master first, then each color channel; alpha is independent. Never mutate input. */
+/** Сначала Master, затем отдельные цветовые каналы; альфа независимо. Исходный массив не меняется. */
 export function applyLevels(source: Raster, settings: LevelsSettings, maximum: number, gray: boolean): Raster {
   const lut = (channel: LevelsChannel) => levelsLut(settings[channel] ?? defaultLevels(maximum), maximum);
   const master = lut('master');

@@ -2,8 +2,8 @@ import type { Raster } from './types';
 
 export interface PixelSample { x: number; y: number; r: number; g: number; b: number; alpha: number; lab: { l: number; a: number; b: number } }
 
-/** sRGB -> linear RGB -> XYZ D50 (Bradford adaptation) -> CIELAB D50.
- * Reference: https://www.w3.org/TR/css-color-4/#color-conversion-code
+/** sRGB -> линейный RGB -> XYZ D50 (адаптация Брэдфорда) -> CIELAB D50.
+ * Описание: https://www.w3.org/TR/css-color-4/#color-conversion-code
  */
 export function rgbToLab(r: number, g: number, b: number): PixelSample['lab'] {
   const linear = (value: number) => {
@@ -11,7 +11,7 @@ export function rgbToLab(r: number, g: number, b: number): PixelSample['lab'] {
     return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   };
   const red = linear(r), green = linear(g), blue = linear(b);
-  // Combined sRGB/Bradford matrix, relative to the D50 reference white.
+  // Объединённая матрица sRGB и адаптации Брэдфорда для точки белого D50.
   const x = (0.4360747 * red + 0.3850649 * green + 0.1430804 * blue) / 0.96422;
   const y = 0.2225045 * red + 0.7168786 * green + 0.0606169 * blue;
   const z = (0.0139322 * red + 0.0971045 * green + 0.7141733 * blue) / 0.82521;

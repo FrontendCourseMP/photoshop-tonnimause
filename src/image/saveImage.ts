@@ -24,7 +24,7 @@ export async function encodeImage(image: ImageDocument, options: ExportOptions):
   if (!context) throw new Error('Не удалось создать холст для сохранения.');
   context.putImageData(image.pixels, 0, 0);
   if (options.format === 'jpg') {
-    // White is painted behind the image, preserving the current document's alpha.
+    // Белый фон добавляется под изображение, не меняя альфу текущего документа.
     context.globalCompositeOperation = 'destination-over';
     context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height);
   }
@@ -44,7 +44,7 @@ export function downloadBlob(blob: Blob, name: string): void {
   document.body.append(link);
   try { link.click(); } finally {
     link.remove();
-    // Keep the URL alive until the browser has started consuming the download.
+    // Освобождаем URL с задержкой, чтобы браузер успел начать скачивание.
     window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
   }
 }

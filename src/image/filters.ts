@@ -22,8 +22,8 @@ export function validateKernel(kernel: readonly number[]): void {
   }
 }
 
-/** Prepare a fresh destination and a row processor usable in a worker or cooperative loop.
- * No browser APIs. Source and unselected channels remain unchanged.
+/** Создаём отдельный результат и обработчик строк для фонового расчёта.
+ * Без браузерных API. Исходные пиксели и невыбранные каналы не изменяются.
  */
 export function prepareFilter(source: Raster, options: FilterOptions) {
   checkDimensions(source.width, source.height);
@@ -54,7 +54,7 @@ export function prepareFilter(source: Raster, options: FilterOptions) {
       let sum = 0;
       for (let i = 0; i < 9; i++) {
         const value = read(x + i % 3 - 1, y + Math.floor(i / 3) - 1, component);
-        // Mathematical convolution rotates the kernel by 180 degrees.
+        // При свёртке ядро разворачивается на 180 градусов.
         if (kernel) sum += value * kernel[8 - i]!;
         else neighbors[i] = value;
       }
@@ -65,7 +65,7 @@ export function prepareFilter(source: Raster, options: FilterOptions) {
   return { result, renderRows };
 }
 
-/** Synchronous entry point for tests and small rasters; UI must use background processing. */
+/** Синхронный расчёт для тестов и маленьких изображений; интерфейс использует фоновый расчёт. */
 export function filterRaster(source: Raster, options: FilterOptions): Raster {
   const job = prepareFilter(source, options);
   job.renderRows(0, source.height);
