@@ -38,7 +38,7 @@ export function ExportDialog({ image, onClose }: { image: ImageDocument; onClose
       onCancel={event => { event.preventDefault(); if (!saving) onClose(); }}>
       <form onSubmit={event => { event.preventDefault(); void save(); }}>
         <h2 id="export-title">Сохранить изображение</h2>
-        <p className="export-source">{image.pixels.width} × {image.pixels.height} px · исходное изображение</p>
+        <p className="export-source">{image.pixels.width} × {image.pixels.height} px · текущее изображение</p>
         <fieldset disabled={saving}>
           <label className="field-label" htmlFor="export-format">Формат файла</label>
           <select id="export-format" value={format} onChange={event => setFormat(event.target.value as ExportFormat)}>

@@ -66,6 +66,11 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; position: sticky; bottom: -24px; padding: 12px 0; background: #202b2c; }
 .export-error { color: #ffb7a9; font-size: 13px; }
+.resize-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.resize-fields label { min-width: 0; font-size: 13px; }
+.resize-fields input { width: 100%; margin-top: 6px; padding: 8px; border: 1px solid #52615b; background: #152021; color: inherit; }
+.interpolation-help { position: relative; margin-top: 12px; }
+.interpolation-help [role='tooltip'] { position: absolute; z-index: 3; left: 0; bottom: 100%; width: 100%; padding: 10px; border: 1px solid #acd6c2; background: #152021; font-size: 12px; line-height: 1.5; border-radius: 5px; }
 .levels-dialog { width: min(520px, calc(100% - 24px)); }
 .levels-dialog .dialog-actions { flex-wrap: wrap; gap: 6px; }
 .levels-dialog .dialog-actions button { padding: 8px 10px; }

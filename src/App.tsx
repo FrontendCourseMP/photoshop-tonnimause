@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
 import { LevelsDialog } from './components/LevelsDialog';
+import { ResizeDialog } from './components/ResizeDialog';
 import { interpolationMethods, type InterpolationMethod } from './image/resample';
 import { PixelInfo } from './components/PixelInfo';
 import type { PixelSample } from './image/pipette';
@@ -20,6 +21,7 @@ export function App() {
   const [dragging, setDragging] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
+  const [resizeOpen, setResizeOpen] = useState(false);
   const [levelsPreview, setLevelsPreview] = useState<Raster | null>(null);
   const [pipette, setPipette] = useState(false);
   const [picked, setPicked] = useState<{ image: ImageDocument; sample: PixelSample } | null>(null);
@@ -49,6 +51,7 @@ export function App() {
           <button disabled={!image || loading} onClick={() => setExportOpen(true)}>Сохранить</button>
           <button disabled={!image || loading} aria-pressed={pipette} onClick={() => setPipette(value => !value)}>Пипетка</button>
           <button disabled={!image || loading} onClick={() => setLevelsOpen(true)}>Уровни</button>
+          <button disabled={!image || loading} onClick={() => setResizeOpen(true)}>Размер изображения</button>
           <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg,.gb7"
             aria-label="Выбрать изображение" onChange={event => {
               void load(event.target.files?.[0]); event.target.value = '';
@@ -88,6 +91,8 @@ export function App() {
           <span className="format-badge">{source.format}</span>
           <span>Ширина: <strong>{source.width} px</strong></span>
           <span>Высота: <strong>{source.height} px</strong></span>
+          {image && (image.pixels.width !== source.width || image.pixels.height !== source.height) &&
+            <span>Текущий размер: <strong>{image.pixels.width} × {image.pixels.height} px</strong></span>}
           <span title={`${source.colorModel}; ${source.bitsPerSample} бит на компоненту или индекс палитры`}>
             Глубина цвета: <strong>{source.colorBits} бит</strong>
           </span>
@@ -98,6 +103,10 @@ export function App() {
         <span className="status-note">{image ? (fit ? 'По размеру окна' : 'Масштаб просмотра') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
       {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
+      {resizeOpen && image && <ResizeDialog image={image} onClose={() => setResizeOpen(false)} onApply={pixels => {
+        setImage({ ...image, pixels: new ImageData(pixels.data, pixels.width, pixels.height) });
+        setFit(false); setResizeOpen(false);
+      }} />}
       {levelsOpen && image && <LevelsDialog image={image} onPreview={setLevelsPreview}
         onClose={() => { setLevelsPreview(null); setLevelsOpen(false); }}
         onApply={pixels => {
