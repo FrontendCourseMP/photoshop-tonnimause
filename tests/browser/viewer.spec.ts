@@ -13,7 +13,7 @@ function chunk(type: string, data: Buffer) {
   return Buffer.concat([length, body, checksum]);
 }
 
-/** Synthetic images with known pixels; no image-processing dependency. */
+/** Тестовые изображения с известными пикселями, без библиотеки обработки изображений. */
 function png(width: number, height: number, alpha = false) {
   const channels = alpha ? 4 : 3;
   const header = Buffer.alloc(13);
@@ -42,7 +42,7 @@ test('empty state, source depth, actual pixels, repeat loading and corrupt input
   await expect(status).toContainText('Высота: 32 px');
   await expect(status).toContainText('Глубина цвета: 24 бит');
   await expect(status).not.toContainText('Альфа-канал');
-  expect(await page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
+  await expect.poll(() => page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
     Array.from(canvas.getContext('2d')!.getImageData(1, 1, 1, 1).data))).toEqual([230, 1, 1, 255]);
   await input.setInputFiles(file);
   await expect(status).toContainText('Ширина: 64 px');
@@ -52,7 +52,7 @@ test('empty state, source depth, actual pixels, repeat loading and corrupt input
   await input.setInputFiles({ name: 'transparent.png', mimeType: 'image/png', buffer: png(20, 10, true) });
   await expect(page.getByRole('alert')).toHaveCount(0);
   await expect(status).toContainText('Альфа-канал: 8 бит');
-  expect(await page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
+  await expect.poll(() => page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
     canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data[3])).toBe(0);
   expect(errors).toEqual([]);
 });

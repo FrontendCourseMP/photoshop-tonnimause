@@ -23,7 +23,7 @@ test('pipette reads original pixel with scaling and scroll and ignores inactive 
   await page.getByRole('complementary').getByRole('button', { name: 'Красный', exact: true }).click();
   await canvas.click({ button: 'right' });
   await expect(info).toContainText('выбрать пиксель');
-  // Re-evaluate bounding rect after enabling the info panel, which changes fit scale.
+  // Панель информации меняет доступную высоту, поэтому координаты вычисляются заново.
   const click = async () => {
     const bounds = (await canvas.boundingBox())!;
     const viewport = (await page.getByLabel('Область изображения', { exact: true }).boundingBox())!;
@@ -36,6 +36,8 @@ test('pipette reads original pixel with scaling and scroll and ignores inactive 
   };
   await click();
   await page.getByRole('button', { name: '100%', exact: true }).click();
+  await expect(canvas).toHaveAttribute('width', '2400');
+  await expect(canvas).toHaveAttribute('height', '1600');
   await page.locator('.viewport').evaluate(element => { element.scrollLeft = 750; element.scrollTop = 450; });
   await click();
   await input.setInputFiles(resolve('tests/fixtures/images/small.jpg'));
