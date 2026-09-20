@@ -95,6 +95,11 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .black-marker::-moz-range-thumb { background: #111; }
 .white-marker::-moz-range-thumb { background: #fff; }
 .level-marker:focus-visible { outline: 2px solid #acd6c2; outline-offset: 2px; z-index: 2; }
+.levels-track.is-crowded { height: 72px; }
+.is-crowded .level-marker { inset: auto 0; height: 20px; }
+.is-crowded .black-marker { top: 0; }
+.is-crowded .gamma-marker { top: 26px; }
+.is-crowded .white-marker { top: 52px; }
 .levels-numbers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .levels-numbers label { font-size: 11px; }
 .levels-numbers input { display: block; width: 100%; margin-top: 5px; padding: 6px; color: inherit; background: #152021; border: 1px solid #52615b; }
@@ -120,4 +125,15 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
   .channel-button img { width: 28px; height: 28px; }
   .channel-button small { margin-top: 2px; }
   .channel-panel p { display: none; }
+}
+@media (max-width: 600px), (max-height: 450px) {
+  .toolbar { flex-shrink: 0; min-height: 50px; padding: 6px 10px; }
+  .toolbar .brand, .toolbar .file-name { display: none; }
+  .toolbar-actions { flex-wrap: nowrap; overflow-x: auto; width: 100%; min-width: 0; padding: 3px; }
+  .toolbar-actions > button, .toolbar-actions .view-switch { flex-shrink: 0; white-space: nowrap; }
+  .statusbar { flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; }
+  .statusbar > * { flex-shrink: 0; white-space: nowrap; }
+  .status-note { flex-basis: auto; }
+  .pixel-info { flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
+  .pixel-info > * { flex-shrink: 0; }
 }

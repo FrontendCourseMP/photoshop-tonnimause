@@ -25,9 +25,14 @@ export function ResizeDialog({ image, onClose, onApply }: {
     if (other !== null) { if (axis === 'width') setHeight(other); else setWidth(other); }
   };
   const switchUnit = (next: ResizeUnit) => {
-    if (!target) return;
-    setWidth(String(next === 'pixels' ? target.width : Number((target.width * 100 / original.width).toPrecision(12))));
-    setHeight(String(next === 'pixels' ? target.height : Number((target.height * 100 / original.height).toPrecision(12))));
+    const convert = (value: string, axis: keyof Size) => {
+      if (!value.trim() || !Number.isFinite(Number(value))) return '';
+      const pixels = target?.[axis] ?? (unit === 'pixels' ? Number(value) : Number(value) * original[axis] / 100);
+      return String(next === 'pixels' ? Math.round(pixels) : Number((pixels * 100 / original[axis]).toPrecision(12)));
+    };
+    setWidth(convert(width, 'width'));
+    setHeight(convert(height, 'height'));
+    setFailure('');
     setUnit(next);
   };
   return <Modal title="Изменить размер" titleId="resize-title" onClose={onClose}>

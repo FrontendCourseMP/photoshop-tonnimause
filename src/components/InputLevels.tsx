@@ -3,13 +3,15 @@ import { gammaAtPosition, midpoint, type InputLevels as Values } from '../image/
 export function InputLevels({ values, maximum, onChange }: {
   values: Values; maximum: number; onChange: (field: keyof Values, value: number) => void;
 }) {
+  const middle = midpoint(values);
+  const crowded = Math.min(middle - values.black, values.white - middle) < maximum * 0.1;
   return <fieldset className="input-levels">
     <legend>Входные уровни</legend>
-    <div className="levels-track">
+    <div className={`levels-track${crowded ? ' is-crowded' : ''}`}>
       <input aria-label="Маркер чёрной точки" className="level-marker black-marker" type="range" min="0" max={maximum} step="1"
         value={values.black} onChange={event => onChange('black', Number(event.target.value))} />
       <input aria-label="Маркер полутонов" className="level-marker gamma-marker" type="range" min="0" max={maximum} step="0.001"
-        value={midpoint(values)} onChange={event => onChange('gamma', gammaAtPosition(values, Number(event.target.value)))} />
+        value={middle} onChange={event => onChange('gamma', gammaAtPosition(values, Number(event.target.value)))} />
       <input aria-label="Маркер белой точки" className="level-marker white-marker" type="range" min="0" max={maximum} step="1"
         value={values.white} onChange={event => onChange('white', Number(event.target.value))} />
     </div>
