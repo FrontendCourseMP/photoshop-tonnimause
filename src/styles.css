@@ -67,6 +67,14 @@ canvas { display: block; background-color: #ddd; background-image: conic-gradien
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; position: sticky; bottom: -24px; padding: 12px 0; background: #202b2c; }
 .export-error { color: #ffb7a9; font-size: 13px; }
 .resize-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.filter-settings { border: 0; padding: 0; margin: 0; min-width: 0; }
+.kernel-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0; }
+.kernel-grid input { min-width: 0; width: 100%; padding: 8px 4px; color: inherit; background: #152021; border: 1px solid #52615b; }
+.filter-channels { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; padding: 12px; border: 1px solid #52615b; }
+.filter-channels legend { font-size: 13px; }
+.filter-progress { margin-top: 12px; font-size: 13px; }
+.filter-progress progress { display: block; width: 100%; margin-top: 6px; accent-color: #acd6c2; }
+.filter-actions { flex-wrap: wrap; }
 .resize-fields label { min-width: 0; font-size: 13px; }
 .resize-fields input { width: 100%; margin-top: 6px; padding: 8px; border: 1px solid #52615b; background: #152021; color: inherit; }
 .interpolation-help { position: relative; margin-top: 12px; }

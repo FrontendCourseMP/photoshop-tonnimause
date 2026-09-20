@@ -3,6 +3,7 @@ import { ImageWorkspace } from './components/ImageWorkspace';
 import { ExportDialog } from './components/ExportDialog';
 import { LevelsDialog } from './components/LevelsDialog';
 import { ResizeDialog } from './components/ResizeDialog';
+import { FilterDialog } from './components/FilterDialog';
 import { interpolationMethods, type InterpolationMethod } from './image/resample';
 import { PixelInfo } from './components/PixelInfo';
 import type { PixelSample } from './image/pipette';
@@ -22,6 +23,7 @@ export function App() {
   const [exportOpen, setExportOpen] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [resizeOpen, setResizeOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [levelsPreview, setLevelsPreview] = useState<Raster | null>(null);
   const [pipette, setPipette] = useState(false);
   const [picked, setPicked] = useState<{ image: ImageDocument; sample: PixelSample } | null>(null);
@@ -52,6 +54,7 @@ export function App() {
           <button disabled={!image || loading} aria-pressed={pipette} onClick={() => setPipette(value => !value)}>Пипетка</button>
           <button disabled={!image || loading} onClick={() => setLevelsOpen(true)}>Уровни</button>
           <button disabled={!image || loading} onClick={() => setResizeOpen(true)}>Размер изображения</button>
+          <button disabled={!image || loading} onClick={() => setFilterOpen(true)}>Фильтры</button>
           <input ref={inputRef} type="file" className="file-input" accept=".png,.jpg,.jpeg,.gb7"
             aria-label="Выбрать изображение" onChange={event => {
               void load(event.target.files?.[0]); event.target.value = '';
@@ -103,6 +106,12 @@ export function App() {
         <span className="status-note">{image ? (fit ? 'По размеру окна' : 'Масштаб просмотра') : 'Файлы обрабатываются в браузере'}</span>
       </footer>
       {exportOpen && image && <ExportDialog image={image} onClose={() => setExportOpen(false)} />}
+      {filterOpen && image && <FilterDialog image={image} onPreview={setLevelsPreview}
+        onClose={() => { setLevelsPreview(null); setFilterOpen(false); }}
+        onApply={pixels => {
+          setImage({ ...image, pixels: new ImageData(pixels.data, pixels.width, pixels.height) });
+          setLevelsPreview(null); setFilterOpen(false);
+        }} />}
       {resizeOpen && image && <ResizeDialog image={image} onClose={() => setResizeOpen(false)} onApply={pixels => {
         setImage({ ...image, pixels: new ImageData(pixels.data, pixels.width, pixels.height) });
         setFit(false); setResizeOpen(false);
