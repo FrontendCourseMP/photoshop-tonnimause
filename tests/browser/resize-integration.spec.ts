@@ -32,16 +32,16 @@ test('resize retains zoom and channel selection after levels and updates pipette
   await expect(page.getByRole('slider', { name: 'Масштаб просмотра' })).toHaveValue('200');
   await expect(page.getByRole('complementary').getByRole('button', { name: 'Зелёный', exact: true })).toHaveAttribute('aria-pressed', 'false');
   await expect.poll(() => page.locator('canvas').evaluate((canvas: HTMLCanvasElement) =>
-    Array.from(canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data))).toEqual([40, 0, 159, 255]);
+    Array.from(canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data))).toEqual([48, 0, 90, 255]);
   await expect.poll(() => page.getByAltText('Канал Зелёный').evaluate((image: HTMLImageElement) => {
     const c = document.createElement('canvas'); c.width = image.naturalWidth; c.height = image.naturalHeight;
     c.getContext('2d')!.drawImage(image, 0, 0);
     return c.getContext('2d')!.getImageData(0, 0, 1, 1).data[0];
-  })).toBe(80);
+  })).toBe(59);
   await page.getByRole('button', { name: 'Пипетка', exact: true }).click();
   await page.locator('canvas').click({ position: { x: 21, y: 9 } });
   await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('X: 10 · Y: 4');
-  await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('R: 40 · G: 80 · B: 159');
+  await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('R: 48 · G: 59 · B: 90');
   await page.getByRole('button', { name: 'Уровни', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('Всего пикселей: 128');
   await page.getByRole('spinbutton', { name: 'Гамма', exact: true }).fill('2');

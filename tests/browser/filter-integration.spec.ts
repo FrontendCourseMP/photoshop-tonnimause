@@ -42,19 +42,19 @@ test('фильтр работает после уровней и размера 
   await expect(green).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('canvas')).toHaveAttribute('width', '32');
   await expect(page.locator('canvas')).toHaveAttribute('height', '16');
-  await expect.poll(() => pixel(page)).toEqual([80, 0, 159, 255]);
+  await expect.poll(() => pixel(page)).toEqual([96, 0, 90, 255]);
   await page.getByRole('button', { name: 'Пипетка', exact: true }).click();
   await page.locator('canvas').click({ position: { x: 21, y: 9 } });
   await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('X: 10 · Y: 4');
-  await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('R: 80 · G: 80 · B: 159');
+  await expect(page.getByLabel('Исходный цвет пикселя')).toContainText('R: 96 · G: 59 · B: 90');
   await expect.poll(() => page.getByAltText('Канал Красный').evaluate((image: HTMLImageElement) => {
     const canvas = document.createElement('canvas'); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
     canvas.getContext('2d')!.drawImage(image, 0, 0);
     return canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data[0];
-  })).toBe(80);
+  })).toBe(96);
   await page.getByRole('button', { name: 'Уровни', exact: true }).click();
   await page.getByLabel('Канал коррекции').selectOption('red');
-  await expect(page.locator('.histogram rect').nth(80)).toHaveAttribute('data-count', '128');
+  await expect(page.locator('.histogram rect').nth(96)).toHaveAttribute('data-count', '128');
   await page.keyboard.press('Escape');
 });
 

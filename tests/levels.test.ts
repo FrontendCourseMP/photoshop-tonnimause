@@ -29,7 +29,7 @@ it('applies master then channel and independent alpha without changing source', 
   const source = { width: 1, height: 1, data: new Uint8ClampedArray([64, 128, 192, 128]) };
   const result = applyLevels(source, { master: { black: 0, white: 128, gamma: 1 },
     red: { black: 128, white: 255, gamma: 1 }, alpha: { black: 0, white: 255, gamma: 0.5 } }, 255, false);
-  expect(Array.from(result.data)).toEqual([0, 255, 255, 64]);
+  expect(Array.from(result.data)).toEqual([38, 173, 210, 64]);
   expect(Array.from(source.data)).toEqual([64, 128, 192, 128]);
 });
 it('applies gray levels equally to all components', () => {

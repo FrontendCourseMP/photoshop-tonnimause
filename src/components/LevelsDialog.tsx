@@ -64,7 +64,7 @@ export function LevelsDialog({ image, onClose, onPreview, onApply }: {
       setPreview(event.target.checked);
       if (!event.target.checked) { cancelFrame(); onPreview(null); }
     }} />Предпросмотр</label>
-    <p className="export-hint">Master применяется ко всем цветовым компонентам, затем — настройки отдельных каналов. Альфа изменяется отдельно.</p>
+    <p className="export-hint">Master меняет общую светлоту по шкале гистограммы. Затем применяются настройки отдельных каналов. Альфа изменяется отдельно.</p>
     {error && <p role="alert" className="export-error">{error}</p>}
     <div className="dialog-actions"><button onClick={() => { cancelFrame(); setSettings({}); onPreview(null); setError(''); }}>Сброс</button>
       <button onClick={() => { cancelFrame(); onClose(); }}>Отмена</button>

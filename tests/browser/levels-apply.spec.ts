@@ -23,10 +23,10 @@ test('preview toggles, resets and cancels without cumulative changes', async ({ 
   const preview = page.getByRole('checkbox', { name: 'Предпросмотр' });
   await expect(preview).toBeChecked();
   await page.getByRole('spinbutton', { name: 'Белая точка', exact: true }).fill('128');
-  await expect.poll(() => pixel(page)).toEqual([128, 255, 255, 255]);
+  await expect.poll(() => pixel(page)).toEqual([147, 173, 210, 255]);
   for (let i = 0; i < 3; i++) {
     await preview.uncheck(); await expect.poll(() => pixel(page)).toEqual([64, 128, 192, 255]);
-    await preview.check(); await expect.poll(() => pixel(page)).toEqual([128, 255, 255, 255]);
+    await preview.check(); await expect.poll(() => pixel(page)).toEqual([147, 173, 210, 255]);
   }
   await page.getByRole('button', { name: 'Сброс', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
